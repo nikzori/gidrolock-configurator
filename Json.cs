@@ -12,6 +12,7 @@ namespace Gidrolock_Modbus_Scanner
     {
         public string name;
         public string description;
+        public byte id;
         public List<Entry> entries;
         public CheckEntry checkEntry;
 

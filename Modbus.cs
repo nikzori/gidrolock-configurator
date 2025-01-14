@@ -37,7 +37,7 @@ namespace Gidrolock_Modbus_Scanner
             GetCRC(message, ref CRC);
             message[message.Length - 2] = CRC[0];
             message[message.Length - 1] = CRC[1];
-            string msg = ByteArrayToString(message);
+            //string msg = ByteArrayToString(message);
             //Console.WriteLine("Message: " + msg);
             return message;
         }
@@ -64,7 +64,7 @@ namespace Gidrolock_Modbus_Scanner
         #endregion
 
         #region Read Functions
-        public static bool ReadRegAsync(SerialPort port, byte slaveID, FunctionCode functionCode, ushort address, ushort length)
+        public static bool ReadRegAsync(byte slaveID, FunctionCode functionCode, ushort address, ushort length)
         {
             //Ensure port is open:
             if (port.IsOpen)
@@ -78,13 +78,14 @@ namespace Gidrolock_Modbus_Scanner
 
                 //Build outgoing modbus message:
                 BuildReadMessage(slaveID, (byte)functionCode, address, length, ref message);
-                
+
                 if (message.Length > 1)
                 {
                     //Send modbus message to Serial Port:
                     try
                     {
                         port.Write(message, 0, message.Length);
+                        Console.WriteLine("Message sent");
                         return true;
                     }
                     catch (Exception err)
@@ -106,7 +107,7 @@ namespace Gidrolock_Modbus_Scanner
         #endregion
 
         #region Write Single Coil/Register
-        public static bool WriteSingleAsync(SerialPort port, FunctionCode functionCode, byte slaveID, ushort address, ushort value)
+        public static bool WriteSingleAsync(FunctionCode functionCode, byte slaveID, ushort address, ushort value)
         {
             //Ensure port is open:
             if (!port.IsOpen)
@@ -244,7 +245,7 @@ namespace Gidrolock_Modbus_Scanner
                 byte[] message = new byte[port.BytesToRead];
                 //Console.WriteLine("Bytes to read:" + port.BytesToRead);
                 port.Read(message, 0, port.BytesToRead);
-                //Console.WriteLine("Incoming message: " + ByteArrayToString(message, false));
+                Console.WriteLine("Incoming message: " + ByteArrayToString(message, false));
                 if (message[1] <= 0x04) // read functions
                 {
                     //Console.WriteLine("It's a read message");
