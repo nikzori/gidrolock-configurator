@@ -11,6 +11,10 @@ using System.Xml;
 
 namespace Gidrolock_Modbus_Scanner
 {
+    /*
+     * This is more of a View than a View-Controller
+     * Relegate everything to interface functions for models
+     */
     public partial class Datasheet : Form
     {
         byte modbusID;
@@ -44,6 +48,16 @@ namespace Gidrolock_Modbus_Scanner
                     return;
 
             });
+        }
+
+        private void buttonValve_Click(object sender, EventArgs e)
+        {
+            
+        }
+
+        private void buttonAlarm_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

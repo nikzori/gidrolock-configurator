@@ -8,22 +8,35 @@ using System.Windows.Forms;
 
 namespace Gidrolock_Modbus_Scanner
 {
-    public class Device
+    public class Device : 
     {
         public string name;
-        public string description;
         public byte id;
+        public string modelName;
         public List<Entry> entries;
-        public CheckEntry checkEntry;
 
-        public Device(string name, string description, CheckEntry checkEntry, List<Entry> entries)
+        public Device(string name, string modelName)
         {
             this.name = name;  
-            this.description = description; 
-            this.checkEntry = checkEntry;
-            this.entries = entries;
         }
+
     }
+
+    public interface IHasWiredSensors
+    {
+        Entry GetAlarmStatuses();
+        Entry GetSignalLoss();
+    }
+    public interface IHasWirelessSensors
+    {
+        Entry GetWirelessSensors();
+        Entry GetSensors();
+    }
+    public interface IHasEmergencyOpen
+    {
+        void EmergencyOpen();
+    }
+
     public struct Entry
     {
         public string name;

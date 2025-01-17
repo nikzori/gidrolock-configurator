@@ -16,14 +16,6 @@ namespace Gidrolock_Modbus_Scanner
         public short[] res = new short[12];
         SerialPort port = Modbus.port;
         public int expectedLength = 0;
-        Datasheet datasheet;
-        public SelectedPath selectedPath = SelectedPath.Folder;
-
-        public static Device device; // Deserialized .json object
-        string defaultPath = Application.StartupPath + "\\Configs"; // Default folder path
-
-        Dictionary<CheckEntry, List<Device>> juju = new Dictionary<CheckEntry, List<Device>>(); // dictionary for device identification
-        string[] configs;
 
         public byte[] latestMessage;
         public Dictionary<string, string> models = new Dictionary<string, string>();
