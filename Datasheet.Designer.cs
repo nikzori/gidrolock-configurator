@@ -39,16 +39,16 @@
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.labelCleaning = new System.Windows.Forms.Label();
+            this.buttonCleaning = new System.Windows.Forms.Button();
+            this.label7 = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
+            this.button2 = new System.Windows.Forms.Button();
+            this.buttonAlarm = new System.Windows.Forms.Button();
+            this.buttonValve = new System.Windows.Forms.Button();
             this.labelValve = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
-            this.buttonValve = new System.Windows.Forms.Button();
-            this.buttonAlarm = new System.Windows.Forms.Button();
-            this.button2 = new System.Windows.Forms.Button();
-            this.label5 = new System.Windows.Forms.Label();
-            this.label6 = new System.Windows.Forms.Label();
-            this.label7 = new System.Windows.Forms.Label();
-            this.buttonCleaning = new System.Windows.Forms.Button();
-            this.label8 = new System.Windows.Forms.Label();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.label9 = new System.Windows.Forms.Label();
             this.label10 = new System.Windows.Forms.Label();
@@ -84,6 +84,7 @@
             this.buttonPoll.TabIndex = 7;
             this.buttonPoll.Text = "Опрос";
             this.buttonPoll.UseVisualStyleBackColor = true;
+            this.buttonPoll.Click += new System.EventHandler(this.buttonPoll_Click);
             // 
             // buttonSetID
             // 
@@ -149,7 +150,7 @@
             // 
             // groupBox2
             // 
-            this.groupBox2.Controls.Add(this.label8);
+            this.groupBox2.Controls.Add(this.labelCleaning);
             this.groupBox2.Controls.Add(this.buttonCleaning);
             this.groupBox2.Controls.Add(this.label7);
             this.groupBox2.Controls.Add(this.label6);
@@ -165,6 +166,81 @@
             this.groupBox2.TabIndex = 1;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Общее";
+            // 
+            // labelCleaning
+            // 
+            this.labelCleaning.AutoSize = true;
+            this.labelCleaning.Location = new System.Drawing.Point(52, 78);
+            this.labelCleaning.Name = "labelCleaning";
+            this.labelCleaning.Size = new System.Drawing.Size(33, 13);
+            this.labelCleaning.TabIndex = 9;
+            this.labelCleaning.Text = "выкл";
+            // 
+            // buttonCleaning
+            // 
+            this.buttonCleaning.Location = new System.Drawing.Point(192, 73);
+            this.buttonCleaning.Name = "buttonCleaning";
+            this.buttonCleaning.Size = new System.Drawing.Size(73, 23);
+            this.buttonCleaning.TabIndex = 8;
+            this.buttonCleaning.Text = "Включить";
+            this.buttonCleaning.UseVisualStyleBackColor = true;
+            this.buttonCleaning.Click += new System.EventHandler(this.buttonCleaning_Click);
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(6, 78);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(48, 13);
+            this.label7.TabIndex = 7;
+            this.label7.Text = "Уборка:";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(61, 48);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(24, 13);
+            this.label6.TabIndex = 6;
+            this.label6.Text = "нет";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(6, 48);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(58, 13);
+            this.label5.TabIndex = 5;
+            this.label5.Text = "Протечка:";
+            // 
+            // button2
+            // 
+            this.button2.Location = new System.Drawing.Point(271, 14);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(73, 52);
+            this.button2.TabIndex = 4;
+            this.button2.Text = "Аварийное открытие";
+            this.button2.UseVisualStyleBackColor = true;
+            // 
+            // buttonAlarm
+            // 
+            this.buttonAlarm.Location = new System.Drawing.Point(192, 43);
+            this.buttonAlarm.Name = "buttonAlarm";
+            this.buttonAlarm.Size = new System.Drawing.Size(73, 23);
+            this.buttonAlarm.TabIndex = 3;
+            this.buttonAlarm.Text = "Авария";
+            this.buttonAlarm.UseVisualStyleBackColor = true;
+            this.buttonAlarm.Click += new System.EventHandler(this.buttonAlarm_Click);
+            // 
+            // buttonValve
+            // 
+            this.buttonValve.Location = new System.Drawing.Point(192, 14);
+            this.buttonValve.Name = "buttonValve";
+            this.buttonValve.Size = new System.Drawing.Size(73, 23);
+            this.buttonValve.TabIndex = 2;
+            this.buttonValve.Text = "Закрыть";
+            this.buttonValve.UseVisualStyleBackColor = true;
+            this.buttonValve.Click += new System.EventHandler(this.buttonValve_Click);
             // 
             // labelValve
             // 
@@ -183,80 +259,6 @@
             this.label4.Size = new System.Drawing.Size(35, 13);
             this.label4.TabIndex = 0;
             this.label4.Text = "Кран:";
-            // 
-            // buttonValve
-            // 
-            this.buttonValve.Location = new System.Drawing.Point(192, 14);
-            this.buttonValve.Name = "buttonValve";
-            this.buttonValve.Size = new System.Drawing.Size(73, 23);
-            this.buttonValve.TabIndex = 2;
-            this.buttonValve.Text = "Закрыть";
-            this.buttonValve.UseVisualStyleBackColor = true;
-            this.buttonValve.Click += new System.EventHandler(this.buttonValve_Click);
-            // 
-            // buttonAlarm
-            // 
-            this.buttonAlarm.Location = new System.Drawing.Point(192, 43);
-            this.buttonAlarm.Name = "buttonAlarm";
-            this.buttonAlarm.Size = new System.Drawing.Size(73, 23);
-            this.buttonAlarm.TabIndex = 3;
-            this.buttonAlarm.Text = "Авария";
-            this.buttonAlarm.UseVisualStyleBackColor = true;
-            this.buttonAlarm.Click += new System.EventHandler(this.buttonAlarm_Click);
-            // 
-            // button2
-            // 
-            this.button2.Location = new System.Drawing.Point(271, 14);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(73, 52);
-            this.button2.TabIndex = 4;
-            this.button2.Text = "Аварийное открытие";
-            this.button2.UseVisualStyleBackColor = true;
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(6, 48);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(58, 13);
-            this.label5.TabIndex = 5;
-            this.label5.Text = "Протечка:";
-            // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(61, 48);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(24, 13);
-            this.label6.TabIndex = 6;
-            this.label6.Text = "нет";
-            // 
-            // label7
-            // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(6, 78);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(48, 13);
-            this.label7.TabIndex = 7;
-            this.label7.Text = "Уборка:";
-            // 
-            // buttonCleaning
-            // 
-            this.buttonCleaning.Location = new System.Drawing.Point(192, 73);
-            this.buttonCleaning.Name = "buttonCleaning";
-            this.buttonCleaning.Size = new System.Drawing.Size(73, 23);
-            this.buttonCleaning.TabIndex = 8;
-            this.buttonCleaning.Text = "Включить";
-            this.buttonCleaning.UseVisualStyleBackColor = true;
-            // 
-            // label8
-            // 
-            this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(52, 78);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(33, 13);
-            this.label8.TabIndex = 9;
-            this.label8.Text = "выкл";
             // 
             // flowLayoutPanel1
             // 
@@ -339,7 +341,7 @@
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Button buttonAlarm;
-        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.Label labelCleaning;
         private System.Windows.Forms.Button buttonCleaning;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Label label6;

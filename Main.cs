@@ -19,8 +19,14 @@ namespace Gidrolock_Modbus_Scanner
 
         public byte[] latestMessage;
         public Dictionary<string, string> models = new Dictionary<string, string>();
+
+        byte[] message = null;
+        byte[] data = null;
         
-        DateTime dateTime;
+
+    DateTime dateTime;
+
+        Datasheet datasheet;
         #region Initialization
         public App()
         {
@@ -32,8 +38,8 @@ namespace Gidrolock_Modbus_Scanner
             TextBox_Log.Text = "Приложение готово к работе.";
 
             cBoxDevice.Items.Add("Standard");
-            cBoxDevice.Items.Add("Premium Plus");
             cBoxDevice.Items.Add("Inteli");
+            cBoxDevice.Items.Add("Premium Plus");
             cBoxDevice.Items.Add("Premium");
             cBoxDevice.SelectedIndex = 0;
 
@@ -44,8 +50,8 @@ namespace Gidrolock_Modbus_Scanner
             UpDown_ModbusID.Maximum = 247;
 
             models.Add("Standard", "STW485");
-            models.Add("Premuim Plus", "BUP485");
             models.Add("Inteli", "INTELI");
+            models.Add("Premuim Plus", "BUP485");
             models.Add("Premium", "BUP485");
 
             /* - Version Check - */
@@ -53,6 +59,12 @@ namespace Gidrolock_Modbus_Scanner
             System.Diagnostics.FileVersionInfo fvi = System.Diagnostics.FileVersionInfo.GetVersionInfo(assembly.Location);
             string version = fvi.FileVersion;
             Console.WriteLine("Version: " + version);
+
+            Modbus.ResponseReceived += (sndr, msg) =>
+            {
+                message = msg.Message;
+                data = msg.Data;
+            };
         }
 
         void App_FormClosed(object sender, FormClosedEventArgs e)
@@ -108,62 +120,89 @@ namespace Gidrolock_Modbus_Scanner
                 // if matching model is found, instantiate device window
 
                 // setup event listener
-                byte[] message = null;
-                byte[] data = null;
-                Modbus.ResponseReceived += (sndr, msg) =>
-                {
-                    message = msg.Message;
-                    data = msg.Data;
-                };
+
 
                 // send message
                 AddLog("Проверка модели устройства.");
-                byte id = (byte)UpDown_ModbusID.Value;
-                Modbus.ReadRegAsync(id, FunctionCode.ReadInput, 200, 6);
 
-                await Task.Run(() =>
+                if (await PollModel())
                 {
-                    while (message is null) { continue; }
-
-                    if (message[1] > 0x10)  //exception code check
-                        return;
-                    
+                    Console.WriteLine("true");
                     // confirm the model
                     string response = ByteArrayToUnicode(data);
                     if (response != models[cBoxDevice.SelectedItem.ToString()])
                     {
                         // response doesn't match expected model
+                        AddLog("Ответ устройства не соответствует выбранной модели. Поиск подходящей модели.");
                         // check whether it matches anything else, offer to open that model if it does
                         string match = "";
+                        string model = "";
+                        int index = 0;
                         foreach (string key in models.Keys)
                         {
                             if (models[key] == response)
+                            {
                                 match = models[key];
+                                model = key;
+                                break;
+                            }
+                            index++;
                         }
 
-                        // if no matches found, 
-                        if (match == "")
+
+                        if (match == "") // if no matches found
+                            MessageBox.Show("Подключенное устройство не соответствует ни одной из поддерживаемых моделей.");
+
+                        else // match found, offer to switch to that model instead
                         {
-                            // report unknown device
-                        }
-                        else
-                        {
-                            // offer to switch to that model instead
-                            // instantiate panel
+                            DialogResult result = MessageBox.Show(("Подключенное устройство соответствует модели " + model + ". Нажмите ОК, чтобы открыть настройки для модели " + model), "Внимание", MessageBoxButtons.OKCancel);
+                            if (result == DialogResult.OK)
+                            {
+                                // instantiate panel
+                                AddLog("Открываю панель конфигурации.");
+
+                                Device device = GetDevice((DeviceType)index);
+                                StartDatasheet(device);
+                            }
                         }
                     }
                     else
                     {
                         // model is correct, instantiate config panel
+                        int index = cBoxDevice.SelectedIndex;
+                        AddLog("Устройство соответстует модели, открываю панель конфигурации.");
+                        Device device = GetDevice((DeviceType)index);
+                        StartDatasheet(device);
                     }
-                });
+                }
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
             }
         }
+        async Task<bool> PollModel()
+        {
+            var send = Modbus.ReadRegAsync((byte)UpDown_ModbusID.Value, FunctionCode.ReadInput, 200, 6);
+            isAwaitingResponse = true;
 
+            Task<bool> delay = Task.WhenAny(Task.Delay(2000), Task.Run(() => { while (isAwaitingResponse) { } return true; })).ContinueWith((t) =>
+            {
+                if (isAwaitingResponse)
+                {
+                    Console.WriteLine("Response timed out.");
+                    isAwaitingResponse = false;
+                }
+                return false;
+            });
+
+            return await delay;
+        }
+        void StartDatasheet(Device device)
+        {
+            datasheet = new Datasheet((byte)UpDown_ModbusID.Value, device);
+            datasheet.Show();
+        }
 
 
         void CBox_Ports_Click(object sender, EventArgs e)
@@ -292,8 +331,51 @@ namespace Gidrolock_Modbus_Scanner
                     break;
             }
         }
+
+        public Device GetDevice(DeviceType dt)
+        {
+            Device d = new Device();
+            switch (dt)
+            {
+                case DeviceType.Standard:
+                    d.modelName = "Standard";
+                    d.name = "Gidrolock Standard Wi-Fi RS485";
+                    d.id = 30;
+                    d.modelName = "STW485";
+
+                    d.valveStatus = new Entry(RegisterType.Coil, 1202);
+                    d.alarmStatus = new Entry(RegisterType.Coil, 1201);
+
+                    d.hasCleaningMode = true;
+                    d.cleaningMode = new Entry(RegisterType.Coil, 3);
+
+                    d.hasBattery = false;
+
+                    d.wiredSensors = 2;
+                    d.hasScenarioSensor = true;
+                    d.sensorsAlarm = new Entry(RegisterType.Discrete, 1343, 24);
+
+                    d.radioStatus = new Entry(RegisterType.Input, 1215, 21);
+
+                    break;
+                case DeviceType.Inteli:
+                    d.modelName = "Inteli";
+                    break;
+                case DeviceType.PremiumPlus:
+                    d.modelName = "Premium Plus";
+                    break;
+                case DeviceType.Premium:
+                    d.modelName = "Premium";
+                    break;
+                default:
+                    break;
+
+            }
+            return d;
+        }
     }
 }
 
 public enum FunctionCode { ReadCoil = 1, ReadDiscrete = 2, ReadHolding = 3, ReadInput = 4, WriteCoil = 5, WriteRegister = 6, WriteMultCoils = 15, WriteMultRegisters = 16 };
-public enum SelectedPath { File, Folder };
+//public enum SelectedPath { File, Folder };
+public enum DeviceType { Standard, Inteli, PremiumPlus, Premium };
