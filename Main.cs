@@ -16,15 +16,11 @@ namespace Gidrolock_Modbus_Scanner
         public short[] res = new short[12];
         SerialPort port = Modbus.port;
         public int expectedLength = 0;
+        ModbusResponseEventArgs latestMessage;
 
-        public byte[] latestMessage;
         public Dictionary<string, string> models = new Dictionary<string, string>();
 
-        byte[] message = null;
-        byte[] data = null;
-        
-
-    DateTime dateTime;
+        DateTime dateTime;
 
         Datasheet datasheet;
         #region Initialization
@@ -38,9 +34,9 @@ namespace Gidrolock_Modbus_Scanner
             TextBox_Log.Text = "Приложение готово к работе.";
 
             cBoxDevice.Items.Add("Standard");
-            cBoxDevice.Items.Add("Inteli");
             cBoxDevice.Items.Add("Premium Plus");
-            cBoxDevice.Items.Add("Premium");
+            //cBoxDevice.Items.Add("Inteli");
+            //cBoxDevice.Items.Add("Premium");
             cBoxDevice.SelectedIndex = 0;
 
             checkboxID.Checked = false;
@@ -50,8 +46,8 @@ namespace Gidrolock_Modbus_Scanner
             UpDown_ModbusID.Maximum = 247;
 
             models.Add("Standard", "STW485");
+            models.Add("Premium Plus", "PRPLS1");
             models.Add("Inteli", "INTELI");
-            models.Add("Premuim Plus", "BUP485");
             models.Add("Premium", "BUP485");
 
             /* - Version Check - */
@@ -62,8 +58,8 @@ namespace Gidrolock_Modbus_Scanner
 
             Modbus.ResponseReceived += (sndr, msg) =>
             {
-                message = msg.Message;
-                data = msg.Data;
+                latestMessage = msg;
+                isAwaitingResponse = false;
             };
         }
 
@@ -119,18 +115,43 @@ namespace Gidrolock_Modbus_Scanner
                 // else parse response to unicode and go through every .json
                 // if matching model is found, instantiate device window
 
-                // setup event listener
 
-
-                // send message
+                string selectedModel = models[cBoxDevice.SelectedItem.ToString()];
+                int selectedIndex = cBoxDevice.SelectedIndex;
                 AddLog("Проверка модели устройства.");
-
-                if (await PollModel())
+                await Task.Run(async () =>
                 {
-                    Console.WriteLine("true");
+                    // send message
+                    latestMessage = null;
+                    isAwaitingResponse = true;
+                    var send = Modbus.ReadRegAsync((byte)UpDown_ModbusID.Value, FunctionCode.ReadInput, 200, 6);
+                    await Task.Delay(2000).ContinueWith(_ =>
+                    {
+                        if (isAwaitingResponse)
+                        {
+                            isAwaitingResponse = false;
+                            MessageBox.Show("Истекло время ожидания ответа от устройства.");
+                        }
+                        return;
+                    });
+
+                    while (isAwaitingResponse) { continue; }
+
+                    if (latestMessage is null) 
+                    {
+                        Console.WriteLine("latestMessage is still null");
+                        return;
+                    }
+
+                    if (latestMessage.Status == ModbusStatus.Error)
+                        return;
+
+
                     // confirm the model
-                    string response = ByteArrayToUnicode(data);
-                    if (response != models[cBoxDevice.SelectedItem.ToString()])
+                    string response = ByteArrayToUnicode(latestMessage.Data);
+                    Console.WriteLine("device model response: " + response);
+                    Console.WriteLine("expected response: " + selectedModel);
+                    if (response != selectedModel)
                     {
                         // response doesn't match expected model
                         AddLog("Ответ устройства не соответствует выбранной модели. Поиск подходящей модели.");
@@ -169,39 +190,22 @@ namespace Gidrolock_Modbus_Scanner
                     else
                     {
                         // model is correct, instantiate config panel
-                        int index = cBoxDevice.SelectedIndex;
                         AddLog("Устройство соответстует модели, открываю панель конфигурации.");
-                        Device device = GetDevice((DeviceType)index);
+                        Device device = GetDevice((DeviceType)selectedIndex);
                         StartDatasheet(device);
                     }
-                }
+                });
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
             }
         }
-        async Task<bool> PollModel()
-        {
-            var send = Modbus.ReadRegAsync((byte)UpDown_ModbusID.Value, FunctionCode.ReadInput, 200, 6);
-            isAwaitingResponse = true;
 
-            Task<bool> delay = Task.WhenAny(Task.Delay(2000), Task.Run(() => { while (isAwaitingResponse) { } return true; })).ContinueWith((t) =>
-            {
-                if (isAwaitingResponse)
-                {
-                    Console.WriteLine("Response timed out.");
-                    isAwaitingResponse = false;
-                }
-                return false;
-            });
-
-            return await delay;
-        }
         void StartDatasheet(Device device)
         {
             datasheet = new Datasheet((byte)UpDown_ModbusID.Value, device);
-            datasheet.Show();
+            Application.Run(datasheet);
         }
 
 
@@ -296,12 +300,14 @@ namespace Gidrolock_Modbus_Scanner
             // stupid fucking Encoding class does byte-by-byte conversion
             List<char> result = new List<char>(input.Length / 2);
             byte[] flip = input;
-            Array.Reverse(flip); // stupid fucking BitConverter is little-endian and spits out chinese nonsense otherwise
-            for (int i = 0; i < flip.Length; i += 2)
+            //Array.Reverse(flip); // stupid fucking BitConverter is little-endian and spits out chinese nonsense otherwise
+            for (int i = 0; i < flip.Length; i++)
             {
-                result.Add(BitConverter.ToChar(flip, i));
+                if (flip[i] == 0x00)
+                    continue;
+                else result.Add(Convert.ToChar(flip[i]));
             }
-            result.Reverse();
+            //result.Reverse();
             return new string(result.ToArray());
         }
 
@@ -338,8 +344,7 @@ namespace Gidrolock_Modbus_Scanner
             switch (dt)
             {
                 case DeviceType.Standard:
-                    d.modelName = "Standard";
-                    d.name = "Gidrolock Standard Wi-Fi RS485";
+                    d.name = "Standard Wi-Fi RS485";
                     d.id = 30;
                     d.modelName = "STW485";
 
@@ -362,7 +367,22 @@ namespace Gidrolock_Modbus_Scanner
                     d.modelName = "Inteli";
                     break;
                 case DeviceType.PremiumPlus:
-                    d.modelName = "Premium Plus";
+                    d.name = "Premium Plus Wi-Fi";
+                    d.id = 30;
+                    d.modelName = "PRPLS1";
+
+                    d.valveStatus = new Entry(RegisterType.Coil, 1202);
+                    d.alarmStatus = new Entry(RegisterType.Coil, 1201);
+
+                    d.hasCleaningMode = true;
+                    d.cleaningMode = new Entry(RegisterType.Coil, 3);
+
+                    d.hasBattery = true;
+                    d.batteryCharge = new Entry(RegisterType.Input, 1207);
+
+                    d.wiredSensors = 7;
+                    d.hasScenarioSensor = true;
+                    d.sensorsAlarm = new Entry(RegisterType.Discrete, 1343, 29);
                     break;
                 case DeviceType.Premium:
                     d.modelName = "Premium";
@@ -378,4 +398,4 @@ namespace Gidrolock_Modbus_Scanner
 
 public enum FunctionCode { ReadCoil = 1, ReadDiscrete = 2, ReadHolding = 3, ReadInput = 4, WriteCoil = 5, WriteRegister = 6, WriteMultCoils = 15, WriteMultRegisters = 16 };
 //public enum SelectedPath { File, Folder };
-public enum DeviceType { Standard, Inteli, PremiumPlus, Premium };
+public enum DeviceType { Standard, PremiumPlus, Inteli, Premium };

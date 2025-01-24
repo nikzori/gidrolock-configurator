@@ -30,6 +30,8 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Datasheet));
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.labelBattery = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
             this.buttonPoll = new System.Windows.Forms.Button();
             this.buttonSetID = new System.Windows.Forms.Button();
             this.labelFirmware = new System.Windows.Forms.Label();
@@ -42,17 +44,15 @@
             this.labelCleaning = new System.Windows.Forms.Label();
             this.buttonCleaning = new System.Windows.Forms.Button();
             this.label7 = new System.Windows.Forms.Label();
-            this.label6 = new System.Windows.Forms.Label();
+            this.labelAlarm = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.button2 = new System.Windows.Forms.Button();
             this.buttonAlarm = new System.Windows.Forms.Button();
             this.buttonValve = new System.Windows.Forms.Button();
             this.labelValve = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
-            this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
+            this.sensorPanel = new System.Windows.Forms.FlowLayoutPanel();
             this.label9 = new System.Windows.Forms.Label();
-            this.label10 = new System.Windows.Forms.Label();
-            this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudModbusID)).BeginInit();
             this.groupBox2.SuspendLayout();
@@ -60,6 +60,8 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.labelBattery);
+            this.groupBox1.Controls.Add(this.label6);
             this.groupBox1.Controls.Add(this.buttonPoll);
             this.groupBox1.Controls.Add(this.buttonSetID);
             this.groupBox1.Controls.Add(this.labelFirmware);
@@ -68,17 +70,35 @@
             this.groupBox1.Controls.Add(this.label3);
             this.groupBox1.Controls.Add(this.label2);
             this.groupBox1.Controls.Add(this.label1);
-            this.groupBox1.Location = new System.Drawing.Point(369, 12);
+            this.groupBox1.Location = new System.Drawing.Point(304, 12);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(211, 101);
+            this.groupBox1.Size = new System.Drawing.Size(221, 101);
             this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Инфо";
             // 
+            // labelBattery
+            // 
+            this.labelBattery.AutoSize = true;
+            this.labelBattery.Location = new System.Drawing.Point(59, 48);
+            this.labelBattery.Name = "labelBattery";
+            this.labelBattery.Size = new System.Drawing.Size(15, 13);
+            this.labelBattery.TabIndex = 9;
+            this.labelBattery.Text = "%";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(6, 48);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(52, 13);
+            this.label6.TabIndex = 8;
+            this.label6.Text = "Батарея:";
+            // 
             // buttonPoll
             // 
             this.buttonPoll.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonPoll.Location = new System.Drawing.Point(130, 19);
+            this.buttonPoll.Location = new System.Drawing.Point(140, 43);
             this.buttonPoll.Name = "buttonPoll";
             this.buttonPoll.Size = new System.Drawing.Size(75, 23);
             this.buttonPoll.TabIndex = 7;
@@ -88,7 +108,7 @@
             // 
             // buttonSetID
             // 
-            this.buttonSetID.Location = new System.Drawing.Point(130, 55);
+            this.buttonSetID.Location = new System.Drawing.Point(140, 68);
             this.buttonSetID.Name = "buttonSetID";
             this.buttonSetID.Size = new System.Drawing.Size(75, 23);
             this.buttonSetID.TabIndex = 6;
@@ -110,13 +130,13 @@
             this.labelModel.AutoSize = true;
             this.labelModel.Location = new System.Drawing.Point(61, 16);
             this.labelModel.Name = "labelModel";
-            this.labelModel.Size = new System.Drawing.Size(50, 13);
+            this.labelModel.Size = new System.Drawing.Size(46, 13);
             this.labelModel.TabIndex = 4;
-            this.labelModel.Text = "Standard";
+            this.labelModel.Text = "Модель";
             // 
             // nudModbusID
             // 
-            this.nudModbusID.Location = new System.Drawing.Point(74, 58);
+            this.nudModbusID.Location = new System.Drawing.Point(74, 71);
             this.nudModbusID.Name = "nudModbusID";
             this.nudModbusID.Size = new System.Drawing.Size(50, 20);
             this.nudModbusID.TabIndex = 3;
@@ -124,7 +144,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(6, 60);
+            this.label3.Location = new System.Drawing.Point(6, 73);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(62, 13);
             this.label3.TabIndex = 2;
@@ -153,7 +173,7 @@
             this.groupBox2.Controls.Add(this.labelCleaning);
             this.groupBox2.Controls.Add(this.buttonCleaning);
             this.groupBox2.Controls.Add(this.label7);
-            this.groupBox2.Controls.Add(this.label6);
+            this.groupBox2.Controls.Add(this.labelAlarm);
             this.groupBox2.Controls.Add(this.label5);
             this.groupBox2.Controls.Add(this.button2);
             this.groupBox2.Controls.Add(this.buttonAlarm);
@@ -162,7 +182,7 @@
             this.groupBox2.Controls.Add(this.label4);
             this.groupBox2.Location = new System.Drawing.Point(13, 12);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(350, 100);
+            this.groupBox2.Size = new System.Drawing.Size(285, 100);
             this.groupBox2.TabIndex = 1;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Общее";
@@ -170,7 +190,7 @@
             // labelCleaning
             // 
             this.labelCleaning.AutoSize = true;
-            this.labelCleaning.Location = new System.Drawing.Point(52, 78);
+            this.labelCleaning.Location = new System.Drawing.Point(52, 77);
             this.labelCleaning.Name = "labelCleaning";
             this.labelCleaning.Size = new System.Drawing.Size(33, 13);
             this.labelCleaning.TabIndex = 9;
@@ -178,7 +198,7 @@
             // 
             // buttonCleaning
             // 
-            this.buttonCleaning.Location = new System.Drawing.Point(192, 73);
+            this.buttonCleaning.Location = new System.Drawing.Point(125, 72);
             this.buttonCleaning.Name = "buttonCleaning";
             this.buttonCleaning.Size = new System.Drawing.Size(73, 23);
             this.buttonCleaning.TabIndex = 8;
@@ -189,20 +209,20 @@
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(6, 78);
+            this.label7.Location = new System.Drawing.Point(6, 77);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(48, 13);
             this.label7.TabIndex = 7;
             this.label7.Text = "Уборка:";
             // 
-            // label6
+            // labelAlarm
             // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(61, 48);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(24, 13);
-            this.label6.TabIndex = 6;
-            this.label6.Text = "нет";
+            this.labelAlarm.AutoSize = true;
+            this.labelAlarm.Location = new System.Drawing.Point(61, 48);
+            this.labelAlarm.Name = "labelAlarm";
+            this.labelAlarm.Size = new System.Drawing.Size(24, 13);
+            this.labelAlarm.TabIndex = 6;
+            this.labelAlarm.Text = "нет";
             // 
             // label5
             // 
@@ -215,7 +235,7 @@
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(271, 14);
+            this.button2.Location = new System.Drawing.Point(204, 14);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(73, 52);
             this.button2.TabIndex = 4;
@@ -224,7 +244,7 @@
             // 
             // buttonAlarm
             // 
-            this.buttonAlarm.Location = new System.Drawing.Point(192, 43);
+            this.buttonAlarm.Location = new System.Drawing.Point(125, 43);
             this.buttonAlarm.Name = "buttonAlarm";
             this.buttonAlarm.Size = new System.Drawing.Size(73, 23);
             this.buttonAlarm.TabIndex = 3;
@@ -234,7 +254,7 @@
             // 
             // buttonValve
             // 
-            this.buttonValve.Location = new System.Drawing.Point(192, 14);
+            this.buttonValve.Location = new System.Drawing.Point(125, 14);
             this.buttonValve.Name = "buttonValve";
             this.buttonValve.Size = new System.Drawing.Size(73, 23);
             this.buttonValve.TabIndex = 2;
@@ -260,58 +280,41 @@
             this.label4.TabIndex = 0;
             this.label4.Text = "Кран:";
             // 
-            // flowLayoutPanel1
+            // sensorPanel
             // 
-            this.flowLayoutPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.sensorPanel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
-            this.flowLayoutPanel1.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
-            this.flowLayoutPanel1.Location = new System.Drawing.Point(13, 135);
-            this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(280, 175);
-            this.flowLayoutPanel1.TabIndex = 4;
+            this.sensorPanel.AutoScroll = true;
+            this.sensorPanel.BackColor = System.Drawing.Color.Gainsboro;
+            this.sensorPanel.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
+            this.sensorPanel.Location = new System.Drawing.Point(13, 135);
+            this.sensorPanel.Name = "sensorPanel";
+            this.sensorPanel.Size = new System.Drawing.Size(512, 175);
+            this.sensorPanel.TabIndex = 4;
+            this.sensorPanel.WrapContents = false;
             // 
             // label9
             // 
             this.label9.AutoSize = true;
             this.label9.Location = new System.Drawing.Point(10, 119);
             this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(108, 13);
+            this.label9.Size = new System.Drawing.Size(50, 13);
             this.label9.TabIndex = 5;
-            this.label9.Text = "Проводные датчики";
-            // 
-            // label10
-            // 
-            this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(297, 119);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(78, 13);
-            this.label10.TabIndex = 7;
-            this.label10.Text = "Радиодатчики";
-            // 
-            // flowLayoutPanel2
-            // 
-            this.flowLayoutPanel2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
-            this.flowLayoutPanel2.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
-            this.flowLayoutPanel2.Location = new System.Drawing.Point(300, 135);
-            this.flowLayoutPanel2.Name = "flowLayoutPanel2";
-            this.flowLayoutPanel2.Size = new System.Drawing.Size(280, 175);
-            this.flowLayoutPanel2.TabIndex = 6;
+            this.label9.Text = "Датчики";
             // 
             // Datasheet
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(592, 322);
-            this.Controls.Add(this.label10);
-            this.Controls.Add(this.flowLayoutPanel2);
+            this.ClientSize = new System.Drawing.Size(537, 322);
             this.Controls.Add(this.label9);
-            this.Controls.Add(this.flowLayoutPanel1);
+            this.Controls.Add(this.sensorPanel);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.Name = "Datasheet";
+            this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.Text = "Datasheet";
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
@@ -344,10 +347,10 @@
         private System.Windows.Forms.Label labelCleaning;
         private System.Windows.Forms.Button buttonCleaning;
         private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
+        private System.Windows.Forms.Label labelAlarm;
+        private System.Windows.Forms.FlowLayoutPanel sensorPanel;
         private System.Windows.Forms.Label label9;
-        private System.Windows.Forms.Label label10;
-        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel2;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Label labelBattery;
     }
 }
