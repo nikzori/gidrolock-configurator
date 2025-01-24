@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO.Ports;
-using Newtonsoft.Json;
 
 namespace Gidrolock_Modbus_Scanner
 {
@@ -32,6 +29,17 @@ namespace Gidrolock_Modbus_Scanner
 
             this.UpDown_ModbusID.Value = 0;
             TextBox_Log.Text = "Приложение готово к работе.";
+
+            cBoxSpeed.Items.Add("1200");
+            cBoxSpeed.Items.Add("2400");
+            cBoxSpeed.Items.Add("4800");
+            cBoxSpeed.Items.Add("9600");
+            cBoxSpeed.Items.Add("14400");
+            cBoxSpeed.Items.Add("19200");
+            cBoxSpeed.Items.Add("38400");
+            cBoxSpeed.Items.Add("57600");
+            cBoxSpeed.Items.Add("115200");
+            cBoxSpeed.SelectedIndex = 3;
 
             cBoxDevice.Items.Add("Standard");
             cBoxDevice.Items.Add("Premium Plus");
@@ -70,15 +78,15 @@ namespace Gidrolock_Modbus_Scanner
 
         void Form1_Load(object sender, EventArgs e)
         {
-            CBox_Ports.Items.AddRange(SerialPort.GetPortNames());
-            if (CBox_Ports.Items.Count > 0)
-                CBox_Ports.SelectedIndex = 0;
+            cBoxPorts.Items.AddRange(SerialPort.GetPortNames());
+            if (cBoxPorts.Items.Count > 0)
+                cBoxPorts.SelectedIndex = 0;
         }
         #endregion
 
         private async void ButtonConnect_Click(object sender, EventArgs e)
         {
-            if (CBox_Ports.SelectedItem.ToString() == "COM1")
+            if (cBoxPorts.SelectedItem.ToString() == "COM1")
             {
                 DialogResult res = MessageBox.Show("Выбран серийный порт COM1, который обычно является портом PS/2 или RS-232, не подключенным к Modbus устройству. Продолжить?", "Внимание", MessageBoxButtons.OKCancel);
                 if (res == DialogResult.Cancel)
@@ -98,8 +106,8 @@ namespace Gidrolock_Modbus_Scanner
                     port.Close();
 
                 port.Handshake = Handshake.None;
-                port.PortName = CBox_Ports.Text;
-                port.BaudRate = 9600;
+                port.PortName = cBoxPorts.Text;
+                port.BaudRate = Int32.Parse(cBoxSpeed.Items[cBoxSpeed.SelectedIndex].ToString());
                 port.Parity = Parity.None;
                 port.DataBits = 8;
                 port.StopBits = StopBits.One;
@@ -211,8 +219,8 @@ namespace Gidrolock_Modbus_Scanner
 
         void CBox_Ports_Click(object sender, EventArgs e)
         {
-            CBox_Ports.Items.Clear();
-            CBox_Ports.Items.AddRange(SerialPort.GetPortNames());
+            cBoxPorts.Items.Clear();
+            cBoxPorts.Items.AddRange(SerialPort.GetPortNames());
         }
 
         void OnResponseReceived(object sender, ModbusResponseEventArgs e)
@@ -358,7 +366,7 @@ namespace Gidrolock_Modbus_Scanner
 
                     d.wiredSensors = 2;
                     d.hasScenarioSensor = true;
-                    d.sensorsAlarm = new Entry(RegisterType.Discrete, 1343, 24);
+                    d.sensorAlarm = new Entry(RegisterType.Discrete, 1343, 24);
 
                     d.radioStatus = new Entry(RegisterType.Input, 1215, 21);
 
@@ -382,7 +390,8 @@ namespace Gidrolock_Modbus_Scanner
 
                     d.wiredSensors = 7;
                     d.hasScenarioSensor = true;
-                    d.sensorsAlarm = new Entry(RegisterType.Discrete, 1343, 29);
+                    d.sensorAlarm = new Entry(RegisterType.Discrete, 1343, 29);
+                    d.radioStatus = new Entry(RegisterType.Input, 1215, 21);
                     break;
                 case DeviceType.Premium:
                     d.modelName = "Premium";
@@ -398,4 +407,6 @@ namespace Gidrolock_Modbus_Scanner
 
 public enum FunctionCode { ReadCoil = 1, ReadDiscrete = 2, ReadHolding = 3, ReadInput = 4, WriteCoil = 5, WriteRegister = 6, WriteMultCoils = 15, WriteMultRegisters = 16 };
 //public enum SelectedPath { File, Folder };
+
+
 public enum DeviceType { Standard, PremiumPlus, Inteli, Premium };

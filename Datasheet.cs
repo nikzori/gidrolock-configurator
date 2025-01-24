@@ -40,6 +40,17 @@ namespace Gidrolock_Modbus_Scanner
             this.modbusID = modbusID;
             this.device = device;
 
+            cBoxSpeed.Items.Add("1200");
+            cBoxSpeed.Items.Add("2400");
+            cBoxSpeed.Items.Add("4800");
+            cBoxSpeed.Items.Add("9600");
+            cBoxSpeed.Items.Add("14400");
+            cBoxSpeed.Items.Add("19200");
+            cBoxSpeed.Items.Add("38400");
+            cBoxSpeed.Items.Add("57600");
+            cBoxSpeed.Items.Add("115200");
+            cBoxSpeed.Text = port.BaudRate.ToString();
+
             labelModel.Text = device.name;
             labelFirmware.Text = "v???";
 
@@ -67,10 +78,10 @@ namespace Gidrolock_Modbus_Scanner
                 sensorPanel.Controls.Add(scenSen);
                 scenSen.Visible = true;
             }
-            if (device.wiredSensors < device.sensorsAlarm.length)
+            if (device.wiredSensors < device.sensorAlarm.length)
             {
                 wirelessSensors = new List<WirelessSensor>();
-                int wsrIndex = device.sensorsAlarm.length - device.wiredSensors - (device.hasScenarioSensor ? 1 : 0);
+                int wsrIndex = device.sensorAlarm.length - device.wiredSensors - (device.hasScenarioSensor ? 1 : 0);
                 for (int i = 0; i < wsrIndex; i++)
                 {
                     WirelessSensor wsr = new WirelessSensor(i) { Width = 495, Height = 24 };
@@ -175,18 +186,50 @@ namespace Gidrolock_Modbus_Scanner
                     }
                 }
 
-                res = await PollEntry(device.sensorsAlarm);
+                res = await PollEntry(device.sensorAlarm);
                 if (res)
                 {
                     BitArray bArray = new BitArray(latestMessage.Data);
                     bool[] bools = new bool[bArray.Length];
                     bArray.CopyTo(bools, 0);
-                    for (int i = 0; i < device.sensorsAlarm.length; i++)
+                    for (int i = 0; i < sensorPanel.Controls.Count; i++)
                     {
                         Sensor snsr = sensorPanel.Controls[i] as Sensor;
                         snsr.labelLeak.Text = bools[i] ? "Протечка!" : "нет";
                     }
                 }
+
+                res = await PollEntry(device.radioStatus);
+                if (res)
+                {
+                    List<byte> values = new List<byte>(latestMessage.Data.Length / 2);
+                    for (int i = 1; i < latestMessage.Data.Length; i += 2)
+                        values.Add(latestMessage.Data[i]);
+                    int add = device.wiredSensors + (device.hasScenarioSensor ? 1 : 0);
+                    for (int i = 0; i < sensorPanel.Controls.Count; i++)
+                    {
+
+                        WirelessSensor snsr = sensorPanel.Controls[i + add] as WirelessSensor;
+                        string txt = "нет";
+                        switch (values[i])
+                        {
+                            case 1:
+                                txt = "норма";
+                                break;
+                            case 2:
+                                txt = "протечка";
+                                break;
+                            case 3:
+                                txt = "разряжен";
+                                break;
+                            case 4:
+                                txt = "потеря";
+                                break;
+                        }
+                        snsr.labelStatus.Text = txt;
+                    }
+                }
+
             }
             catch (Exception err) { MessageBox.Show(err.Message); }
         }
@@ -316,8 +359,8 @@ namespace Gidrolock_Modbus_Scanner
         public Label labelBreakFluff = new Label() { Width = 45, Height = 24 };
         public Label labelBreak = new Label() { Width = 55, Height = 24 }; // обрыв линии для WSP+
 
-        public Label labelWSPPlusFluff = new Label() { Width = 45, Height = 24 };
-        public CheckBox wspPlusCheckbox = new CheckBox() { Width = 20, Height = 20 };
+        //public Label labelWSPPlusFluff = new Label() { Width = 45, Height = 24 };
+        //public CheckBox wspPlusCheckbox = new CheckBox() { Width = 20, Height = 14 };
         public WiredSensor(int count)
         {
             this.Margin = Padding.Empty;
@@ -334,8 +377,8 @@ namespace Gidrolock_Modbus_Scanner
             this.Controls.Add(labelLeakFluff);
             this.Controls.Add(labelLeak);
 
-            this.Controls.Add(labelWSPPlusFluff);
-            this.Controls.Add(wspPlusCheckbox);
+            //this.Controls.Add(labelWSPPlusFluff);
+            //this.Controls.Add(wspPlusCheckbox);
 
             labelName.Text = "WSP " + (count + 1);
 
@@ -345,15 +388,16 @@ namespace Gidrolock_Modbus_Scanner
             labelBreakFluff.Text = "Обрыв:";
             labelBreak.Text = "неизвестно";
 
-            labelWSPPlusFluff.Text = "WSP+:";
+            //labelWSPPlusFluff.Text = "WSP+:";
+            //wspPlusCheckbox.Margin = Padding.Empty;
         }
     }
 
     public class WirelessSensor : Sensor
     {
 
-        public Label labelBatteryFluff = new Label() { Width = 55, Height = 24 };
-        public Label labelBattery = new Label() { Width = 45, Height = 24 };
+        public Label labelStatusFluff = new Label() { Width = 45, Height = 24 };
+        public Label labelStatus = new Label() { Width = 55, Height = 24 };
 
         public WirelessSensor(int count)
         {
@@ -364,8 +408,8 @@ namespace Gidrolock_Modbus_Scanner
             this.WrapContents = false;
 
             this.Controls.Add(labelName);
-            this.Controls.Add(labelBatteryFluff);
-            this.Controls.Add(labelBattery);
+            this.Controls.Add(labelStatusFluff);
+            this.Controls.Add(labelStatus);
             this.Controls.Add(labelLeakFluff);
             this.Controls.Add(labelLeak);
 
@@ -374,8 +418,8 @@ namespace Gidrolock_Modbus_Scanner
             labelLeakFluff.Text = "Протечка:";
             labelLeak.Text = "неизвестно";
 
-            labelBatteryFluff.Text = "Батарея:";
-            labelBattery.Text = "???%";
+            labelStatusFluff.Text = "Статус:";
+            labelStatus.Text = "неизвестно";
         }
     }
 

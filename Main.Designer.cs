@@ -32,12 +32,14 @@
             this.TextBox_Log = new System.Windows.Forms.TextBox();
             this.UpDown_ModbusID = new System.Windows.Forms.NumericUpDown();
             this.label2 = new System.Windows.Forms.Label();
-            this.CBox_Ports = new System.Windows.Forms.ComboBox();
+            this.cBoxPorts = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
             this.button1 = new System.Windows.Forms.Button();
             this.cBoxDevice = new System.Windows.Forms.ComboBox();
             this.label3 = new System.Windows.Forms.Label();
             this.checkboxID = new System.Windows.Forms.CheckBox();
+            this.cBoxSpeed = new System.Windows.Forms.ComboBox();
+            this.label4 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.UpDown_ModbusID)).BeginInit();
             this.SuspendLayout();
             // 
@@ -67,14 +69,14 @@
             this.label2.TabIndex = 0;
             this.label2.Text = "Modbus ID";
             // 
-            // CBox_Ports
+            // cBoxPorts
             // 
-            this.CBox_Ports.FormattingEnabled = true;
-            this.CBox_Ports.Location = new System.Drawing.Point(139, 24);
-            this.CBox_Ports.Name = "CBox_Ports";
-            this.CBox_Ports.Size = new System.Drawing.Size(65, 21);
-            this.CBox_Ports.TabIndex = 1;
-            this.CBox_Ports.Text = "COM1";
+            this.cBoxPorts.FormattingEnabled = true;
+            this.cBoxPorts.Location = new System.Drawing.Point(139, 24);
+            this.cBoxPorts.Name = "cBoxPorts";
+            this.cBoxPorts.Size = new System.Drawing.Size(65, 21);
+            this.cBoxPorts.TabIndex = 1;
+            this.cBoxPorts.Text = "COM1";
             // 
             // label1
             // 
@@ -123,16 +125,36 @@
             this.checkboxID.UseVisualStyleBackColor = true;
             this.checkboxID.CheckedChanged += new System.EventHandler(this.checkboxID_CheckedChanged);
             // 
+            // cBoxSpeed
+            // 
+            this.cBoxSpeed.FormattingEnabled = true;
+            this.cBoxSpeed.Location = new System.Drawing.Point(210, 24);
+            this.cBoxSpeed.Name = "cBoxSpeed";
+            this.cBoxSpeed.Size = new System.Drawing.Size(78, 21);
+            this.cBoxSpeed.TabIndex = 7;
+            this.cBoxSpeed.Text = "9600";
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(207, 7);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(55, 13);
+            this.label4.TabIndex = 6;
+            this.label4.Text = "Скорость";
+            // 
             // App
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(518, 226);
+            this.Controls.Add(this.cBoxSpeed);
+            this.Controls.Add(this.label4);
             this.Controls.Add(this.checkboxID);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.cBoxDevice);
             this.Controls.Add(this.button1);
-            this.Controls.Add(this.CBox_Ports);
+            this.Controls.Add(this.cBoxPorts);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.UpDown_ModbusID);
             this.Controls.Add(this.TextBox_Log);
@@ -155,12 +177,14 @@
         private System.Windows.Forms.TextBox TextBox_Log;
         private System.Windows.Forms.NumericUpDown UpDown_ModbusID;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.ComboBox CBox_Ports;
+        private System.Windows.Forms.ComboBox cBoxPorts;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.CheckBox checkboxID;
         private System.Windows.Forms.ComboBox cBoxDevice;
+        private System.Windows.Forms.ComboBox cBoxSpeed;
+        private System.Windows.Forms.Label label4;
     }
 }
 

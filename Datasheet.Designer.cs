@@ -46,13 +46,15 @@
             this.label7 = new System.Windows.Forms.Label();
             this.labelAlarm = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
-            this.button2 = new System.Windows.Forms.Button();
             this.buttonAlarm = new System.Windows.Forms.Button();
             this.buttonValve = new System.Windows.Forms.Button();
             this.labelValve = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.sensorPanel = new System.Windows.Forms.FlowLayoutPanel();
             this.label9 = new System.Windows.Forms.Label();
+            this.button1 = new System.Windows.Forms.Button();
+            this.label8 = new System.Windows.Forms.Label();
+            this.cBoxSpeed = new System.Windows.Forms.ComboBox();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudModbusID)).BeginInit();
             this.groupBox2.SuspendLayout();
@@ -60,6 +62,9 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.cBoxSpeed);
+            this.groupBox1.Controls.Add(this.button1);
+            this.groupBox1.Controls.Add(this.label8);
             this.groupBox1.Controls.Add(this.labelBattery);
             this.groupBox1.Controls.Add(this.label6);
             this.groupBox1.Controls.Add(this.buttonPoll);
@@ -70,9 +75,9 @@
             this.groupBox1.Controls.Add(this.label3);
             this.groupBox1.Controls.Add(this.label2);
             this.groupBox1.Controls.Add(this.label1);
-            this.groupBox1.Location = new System.Drawing.Point(304, 12);
+            this.groupBox1.Location = new System.Drawing.Point(291, 12);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(221, 101);
+            this.groupBox1.Size = new System.Drawing.Size(234, 126);
             this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Инфо";
@@ -98,7 +103,7 @@
             // buttonPoll
             // 
             this.buttonPoll.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonPoll.Location = new System.Drawing.Point(140, 43);
+            this.buttonPoll.Location = new System.Drawing.Point(153, 43);
             this.buttonPoll.Name = "buttonPoll";
             this.buttonPoll.Size = new System.Drawing.Size(75, 23);
             this.buttonPoll.TabIndex = 7;
@@ -108,7 +113,7 @@
             // 
             // buttonSetID
             // 
-            this.buttonSetID.Location = new System.Drawing.Point(140, 68);
+            this.buttonSetID.Location = new System.Drawing.Point(153, 68);
             this.buttonSetID.Name = "buttonSetID";
             this.buttonSetID.Size = new System.Drawing.Size(75, 23);
             this.buttonSetID.TabIndex = 6;
@@ -138,7 +143,7 @@
             // 
             this.nudModbusID.Location = new System.Drawing.Point(74, 71);
             this.nudModbusID.Name = "nudModbusID";
-            this.nudModbusID.Size = new System.Drawing.Size(50, 20);
+            this.nudModbusID.Size = new System.Drawing.Size(49, 20);
             this.nudModbusID.TabIndex = 3;
             // 
             // label3
@@ -175,14 +180,13 @@
             this.groupBox2.Controls.Add(this.label7);
             this.groupBox2.Controls.Add(this.labelAlarm);
             this.groupBox2.Controls.Add(this.label5);
-            this.groupBox2.Controls.Add(this.button2);
             this.groupBox2.Controls.Add(this.buttonAlarm);
             this.groupBox2.Controls.Add(this.buttonValve);
             this.groupBox2.Controls.Add(this.labelValve);
             this.groupBox2.Controls.Add(this.label4);
             this.groupBox2.Location = new System.Drawing.Point(13, 12);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(285, 100);
+            this.groupBox2.Size = new System.Drawing.Size(272, 126);
             this.groupBox2.TabIndex = 1;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Общее";
@@ -200,7 +204,7 @@
             // 
             this.buttonCleaning.Location = new System.Drawing.Point(125, 72);
             this.buttonCleaning.Name = "buttonCleaning";
-            this.buttonCleaning.Size = new System.Drawing.Size(73, 23);
+            this.buttonCleaning.Size = new System.Drawing.Size(140, 23);
             this.buttonCleaning.TabIndex = 8;
             this.buttonCleaning.Text = "Включить";
             this.buttonCleaning.UseVisualStyleBackColor = true;
@@ -233,20 +237,11 @@
             this.label5.TabIndex = 5;
             this.label5.Text = "Протечка:";
             // 
-            // button2
-            // 
-            this.button2.Location = new System.Drawing.Point(204, 14);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(73, 52);
-            this.button2.TabIndex = 4;
-            this.button2.Text = "Аварийное открытие";
-            this.button2.UseVisualStyleBackColor = true;
-            // 
             // buttonAlarm
             // 
             this.buttonAlarm.Location = new System.Drawing.Point(125, 43);
             this.buttonAlarm.Name = "buttonAlarm";
-            this.buttonAlarm.Size = new System.Drawing.Size(73, 23);
+            this.buttonAlarm.Size = new System.Drawing.Size(140, 23);
             this.buttonAlarm.TabIndex = 3;
             this.buttonAlarm.Text = "Авария";
             this.buttonAlarm.UseVisualStyleBackColor = true;
@@ -256,7 +251,7 @@
             // 
             this.buttonValve.Location = new System.Drawing.Point(125, 14);
             this.buttonValve.Name = "buttonValve";
-            this.buttonValve.Size = new System.Drawing.Size(73, 23);
+            this.buttonValve.Size = new System.Drawing.Size(140, 23);
             this.buttonValve.TabIndex = 2;
             this.buttonValve.Text = "Закрыть";
             this.buttonValve.UseVisualStyleBackColor = true;
@@ -287,26 +282,53 @@
             this.sensorPanel.AutoScroll = true;
             this.sensorPanel.BackColor = System.Drawing.Color.Gainsboro;
             this.sensorPanel.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
-            this.sensorPanel.Location = new System.Drawing.Point(13, 135);
+            this.sensorPanel.Location = new System.Drawing.Point(13, 168);
             this.sensorPanel.Name = "sensorPanel";
-            this.sensorPanel.Size = new System.Drawing.Size(512, 175);
+            this.sensorPanel.Size = new System.Drawing.Size(512, 248);
             this.sensorPanel.TabIndex = 4;
             this.sensorPanel.WrapContents = false;
             // 
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(10, 119);
+            this.label9.Location = new System.Drawing.Point(10, 152);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(50, 13);
             this.label9.TabIndex = 5;
             this.label9.Text = "Датчики";
             // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(153, 94);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.TabIndex = 12;
+            this.button1.Text = "Изменить";
+            this.button1.UseVisualStyleBackColor = true;
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(6, 99);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(58, 13);
+            this.label8.TabIndex = 10;
+            this.label8.Text = "Скорость:";
+            // 
+            // cBoxSpeed
+            // 
+            this.cBoxSpeed.FormattingEnabled = true;
+            this.cBoxSpeed.Location = new System.Drawing.Point(74, 97);
+            this.cBoxSpeed.Name = "cBoxSpeed";
+            this.cBoxSpeed.Size = new System.Drawing.Size(73, 21);
+            this.cBoxSpeed.TabIndex = 13;
+            this.cBoxSpeed.Text = "9600";
+            // 
             // Datasheet
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(537, 322);
+            this.ClientSize = new System.Drawing.Size(537, 428);
             this.Controls.Add(this.label9);
             this.Controls.Add(this.sensorPanel);
             this.Controls.Add(this.groupBox2);
@@ -315,7 +337,7 @@
             this.MaximizeBox = false;
             this.Name = "Datasheet";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
-            this.Text = "Datasheet";
+            this.Text = "Config";
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudModbusID)).EndInit();
@@ -342,7 +364,6 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Button buttonValve;
         private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Button buttonAlarm;
         private System.Windows.Forms.Label labelCleaning;
         private System.Windows.Forms.Button buttonCleaning;
@@ -352,5 +373,8 @@
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label labelBattery;
+        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.ComboBox cBoxSpeed;
     }
 }

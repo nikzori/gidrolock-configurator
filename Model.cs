@@ -21,7 +21,7 @@ namespace Gidrolock_Modbus_Scanner
 
         public int wiredSensors;
         public bool hasScenarioSensor;
-        public Entry sensorsAlarm;
+        public Entry sensorAlarm;
 
         public List<Entry> wiredLineBreak;
 
