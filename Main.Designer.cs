@@ -30,17 +30,14 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(App));
             this.TextBox_Log = new System.Windows.Forms.TextBox();
-            this.UpDown_ModbusID = new System.Windows.Forms.NumericUpDown();
+            this.upDownModbusID = new System.Windows.Forms.NumericUpDown();
             this.label2 = new System.Windows.Forms.Label();
             this.cBoxPorts = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
             this.button1 = new System.Windows.Forms.Button();
-            this.cBoxDevice = new System.Windows.Forms.ComboBox();
-            this.label3 = new System.Windows.Forms.Label();
-            this.checkboxID = new System.Windows.Forms.CheckBox();
             this.cBoxSpeed = new System.Windows.Forms.ComboBox();
             this.label4 = new System.Windows.Forms.Label();
-            ((System.ComponentModel.ISupportInitialize)(this.UpDown_ModbusID)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.upDownModbusID)).BeginInit();
             this.SuspendLayout();
             // 
             // TextBox_Log
@@ -53,17 +50,22 @@
             this.TextBox_Log.Size = new System.Drawing.Size(498, 160);
             this.TextBox_Log.TabIndex = 1;
             // 
-            // UpDown_ModbusID
+            // upDownModbusID
             // 
-            this.UpDown_ModbusID.Location = new System.Drawing.Point(334, 26);
-            this.UpDown_ModbusID.Name = "UpDown_ModbusID";
-            this.UpDown_ModbusID.Size = new System.Drawing.Size(66, 20);
-            this.UpDown_ModbusID.TabIndex = 1;
+            this.upDownModbusID.Location = new System.Drawing.Point(164, 27);
+            this.upDownModbusID.Name = "upDownModbusID";
+            this.upDownModbusID.Size = new System.Drawing.Size(66, 20);
+            this.upDownModbusID.TabIndex = 1;
+            this.upDownModbusID.Value = new decimal(new int[] {
+            30,
+            0,
+            0,
+            0});
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(331, 9);
+            this.label2.Location = new System.Drawing.Point(161, 9);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(59, 13);
             this.label2.TabIndex = 0;
@@ -72,7 +74,7 @@
             // cBoxPorts
             // 
             this.cBoxPorts.FormattingEnabled = true;
-            this.cBoxPorts.Location = new System.Drawing.Point(139, 24);
+            this.cBoxPorts.Location = new System.Drawing.Point(12, 26);
             this.cBoxPorts.Name = "cBoxPorts";
             this.cBoxPorts.Size = new System.Drawing.Size(65, 21);
             this.cBoxPorts.TabIndex = 1;
@@ -81,7 +83,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(136, 7);
+            this.label1.Location = new System.Drawing.Point(9, 9);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(32, 13);
             this.label1.TabIndex = 0;
@@ -97,38 +99,10 @@
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.ButtonConnect_Click);
             // 
-            // cBoxDevice
-            // 
-            this.cBoxDevice.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cBoxDevice.Location = new System.Drawing.Point(12, 24);
-            this.cBoxDevice.Name = "cBoxDevice";
-            this.cBoxDevice.Size = new System.Drawing.Size(121, 21);
-            this.cBoxDevice.TabIndex = 3;
-            this.cBoxDevice.SelectedIndexChanged += new System.EventHandler(this.cBoxDevice_SelectedIndexChanged);
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(9, 8);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(67, 13);
-            this.label3.TabIndex = 4;
-            this.label3.Text = "Устройство";
-            // 
-            // checkboxID
-            // 
-            this.checkboxID.AutoSize = true;
-            this.checkboxID.Location = new System.Drawing.Point(313, 29);
-            this.checkboxID.Name = "checkboxID";
-            this.checkboxID.Size = new System.Drawing.Size(15, 14);
-            this.checkboxID.TabIndex = 5;
-            this.checkboxID.UseVisualStyleBackColor = true;
-            this.checkboxID.CheckedChanged += new System.EventHandler(this.checkboxID_CheckedChanged);
-            // 
             // cBoxSpeed
             // 
             this.cBoxSpeed.FormattingEnabled = true;
-            this.cBoxSpeed.Location = new System.Drawing.Point(210, 24);
+            this.cBoxSpeed.Location = new System.Drawing.Point(83, 26);
             this.cBoxSpeed.Name = "cBoxSpeed";
             this.cBoxSpeed.Size = new System.Drawing.Size(78, 21);
             this.cBoxSpeed.TabIndex = 7;
@@ -137,7 +111,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(207, 7);
+            this.label4.Location = new System.Drawing.Point(80, 9);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(55, 13);
             this.label4.TabIndex = 6;
@@ -150,13 +124,10 @@
             this.ClientSize = new System.Drawing.Size(518, 226);
             this.Controls.Add(this.cBoxSpeed);
             this.Controls.Add(this.label4);
-            this.Controls.Add(this.checkboxID);
-            this.Controls.Add(this.label3);
-            this.Controls.Add(this.cBoxDevice);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.cBoxPorts);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.UpDown_ModbusID);
+            this.Controls.Add(this.upDownModbusID);
             this.Controls.Add(this.TextBox_Log);
             this.Controls.Add(this.label2);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
@@ -167,7 +138,7 @@
             this.Text = "Gidrolock Modbus Scanner";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.App_FormClosed);
             this.Load += new System.EventHandler(this.Form1_Load);
-            ((System.ComponentModel.ISupportInitialize)(this.UpDown_ModbusID)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.upDownModbusID)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -175,14 +146,11 @@
 
         #endregion
         private System.Windows.Forms.TextBox TextBox_Log;
-        private System.Windows.Forms.NumericUpDown UpDown_ModbusID;
+        private System.Windows.Forms.NumericUpDown upDownModbusID;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.ComboBox cBoxPorts;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.CheckBox checkboxID;
-        private System.Windows.Forms.ComboBox cBoxDevice;
         private System.Windows.Forms.ComboBox cBoxSpeed;
         private System.Windows.Forms.Label label4;
     }

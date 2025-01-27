@@ -27,7 +27,7 @@ namespace Gidrolock_Modbus_Scanner
             Modbus.Init();
             Modbus.ResponseReceived += OnResponseReceived;
 
-            this.UpDown_ModbusID.Value = 0;
+            this.upDownModbusID.Value = 0;
             TextBox_Log.Text = "Приложение готово к работе.";
 
             cBoxSpeed.Items.Add("1200");
@@ -41,17 +41,9 @@ namespace Gidrolock_Modbus_Scanner
             cBoxSpeed.Items.Add("115200");
             cBoxSpeed.SelectedIndex = 3;
 
-            cBoxDevice.Items.Add("Standard");
-            cBoxDevice.Items.Add("Premium Plus");
-            //cBoxDevice.Items.Add("Inteli");
-            //cBoxDevice.Items.Add("Premium");
-            cBoxDevice.SelectedIndex = 0;
-
-            checkboxID.Checked = false;
-            UpDown_ModbusID.Enabled = false;
-            UpDown_ModbusID.Value = 30;
-            UpDown_ModbusID.Minimum = 1;
-            UpDown_ModbusID.Maximum = 247;
+            upDownModbusID.Value = 30;
+            upDownModbusID.Minimum = 1;
+            upDownModbusID.Maximum = 247;
 
             models.Add("Standard", "STW485");
             models.Add("Premium Plus", "PRPLS1");
@@ -92,7 +84,7 @@ namespace Gidrolock_Modbus_Scanner
                 if (res == DialogResult.Cancel)
                     return;
             }
-            if (UpDown_ModbusID.Value == 0)
+            if (upDownModbusID.Value == 0)
             {
                 DialogResult res = MessageBox.Show("Указан Modbus ID 0 — глобальное вещание. Устройства не смогут отвечать на сообщения. Продолжить?", "Внимание", MessageBoxButtons.OKCancel);
                 if (res == DialogResult.Cancel)
@@ -124,15 +116,12 @@ namespace Gidrolock_Modbus_Scanner
                 // if matching model is found, instantiate device window
 
 
-                string selectedModel = models[cBoxDevice.SelectedItem.ToString()];
-                int selectedIndex = cBoxDevice.SelectedIndex;
-                AddLog("Проверка модели устройства.");
                 await Task.Run(async () =>
                 {
                     // send message
                     latestMessage = null;
                     isAwaitingResponse = true;
-                    var send = Modbus.ReadRegAsync((byte)UpDown_ModbusID.Value, FunctionCode.ReadInput, 200, 6);
+                    var send = Modbus.ReadRegAsync((byte)upDownModbusID.Value, FunctionCode.ReadInput, 200, 6);
                     await Task.Delay(2000).ContinueWith(_ =>
                     {
                         if (isAwaitingResponse)
@@ -145,62 +134,36 @@ namespace Gidrolock_Modbus_Scanner
 
                     while (isAwaitingResponse) { continue; }
 
-                    if (latestMessage is null) 
-                    {
-                        Console.WriteLine("latestMessage is still null");
-                        return;
-                    }
-
                     if (latestMessage.Status == ModbusStatus.Error)
                         return;
 
 
                     // confirm the model
                     string response = ByteArrayToUnicode(latestMessage.Data);
-                    Console.WriteLine("device model response: " + response);
-                    Console.WriteLine("expected response: " + selectedModel);
-                    if (response != selectedModel)
+                    int index = 0;
+                    string match = "";
+                    string model = "";
+                    foreach (string key in models.Keys)
                     {
-                        // response doesn't match expected model
-                        AddLog("Ответ устройства не соответствует выбранной модели. Поиск подходящей модели.");
-                        // check whether it matches anything else, offer to open that model if it does
-                        string match = "";
-                        string model = "";
-                        int index = 0;
-                        foreach (string key in models.Keys)
+                        if (models[key] == response)
                         {
-                            if (models[key] == response)
-                            {
-                                match = models[key];
-                                model = key;
-                                break;
-                            }
-                            index++;
+                            match = models[key];
+                            model = key;
+                            break;
                         }
-
-
-                        if (match == "") // if no matches found
-                            MessageBox.Show("Подключенное устройство не соответствует ни одной из поддерживаемых моделей.");
-
-                        else // match found, offer to switch to that model instead
-                        {
-                            DialogResult result = MessageBox.Show(("Подключенное устройство соответствует модели " + model + ". Нажмите ОК, чтобы открыть настройки для модели " + model), "Внимание", MessageBoxButtons.OKCancel);
-                            if (result == DialogResult.OK)
-                            {
-                                // instantiate panel
-                                AddLog("Открываю панель конфигурации.");
-
-                                Device device = GetDevice((DeviceType)index);
-                                StartDatasheet(device);
-                            }
-                        }
+                        index++;
                     }
-                    else
+
+                    if (match == "") // if no matches found
+                        MessageBox.Show("Подключенное устройство не соответствует ни одной из поддерживаемых моделей.");
+
+                    else // match found
                     {
-                        // model is correct, instantiate config panel
-                        AddLog("Устройство соответстует модели, открываю панель конфигурации.");
-                        Device device = GetDevice((DeviceType)selectedIndex);
-                        StartDatasheet(device);
+                            // instantiate panel
+                            AddLog("Открываю панель конфигурации.");
+
+                            Device device = GetDevice((DeviceType)index);
+                            StartDatasheet(device);
                     }
                 });
             }
@@ -212,7 +175,7 @@ namespace Gidrolock_Modbus_Scanner
 
         void StartDatasheet(Device device)
         {
-            datasheet = new Datasheet((byte)UpDown_ModbusID.Value, device);
+            datasheet = new Datasheet((byte)upDownModbusID.Value, device);
             Application.Run(datasheet);
         }
 
@@ -319,33 +282,6 @@ namespace Gidrolock_Modbus_Scanner
             return new string(result.ToArray());
         }
 
-        private void checkboxID_CheckedChanged(object sender, EventArgs e)
-        {
-            UpDown_ModbusID.Enabled = checkboxID.Checked ? true : false;
-        }
-
-        private void cBoxDevice_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            switch (cBoxDevice.SelectedItem)
-            {
-                case "Standard":
-                    UpDown_ModbusID.Value = 30;
-                    break;
-                case "Premium Plus":
-                    UpDown_ModbusID.Value = 30;
-                    break;
-                case "Inteli":
-                    UpDown_ModbusID.Value = 26;
-                    break;
-                case "Premium":
-                    UpDown_ModbusID.Value = 26;
-                    break;
-                default:
-                    Console.WriteLine("Invalid change");
-                    break;
-            }
-        }
-
         public Device GetDevice(DeviceType dt)
         {
             Device d = new Device();
@@ -355,6 +291,7 @@ namespace Gidrolock_Modbus_Scanner
                     d.name = "Standard Wi-Fi RS485";
                     d.id = 30;
                     d.modelName = "STW485";
+                    d.baudRate = new Entry(RegisterType.Holding, 110);
 
                     d.valveStatus = new Entry(RegisterType.Coil, 1202);
                     d.alarmStatus = new Entry(RegisterType.Coil, 1201);
@@ -378,6 +315,7 @@ namespace Gidrolock_Modbus_Scanner
                     d.name = "Premium Plus Wi-Fi";
                     d.id = 30;
                     d.modelName = "PRPLS1";
+                    d.baudRate = new Entry(RegisterType.Holding, 110);
 
                     d.valveStatus = new Entry(RegisterType.Coil, 1202);
                     d.alarmStatus = new Entry(RegisterType.Coil, 1201);
@@ -395,6 +333,9 @@ namespace Gidrolock_Modbus_Scanner
                     break;
                 case DeviceType.Premium:
                     d.modelName = "Premium";
+                    d.id = 26;
+                    d.modelName = "BUP485";
+                    d.baudRate = new Entry(RegisterType.Holding, 110);
                     break;
                 default:
                     break;

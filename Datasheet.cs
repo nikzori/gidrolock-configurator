@@ -346,6 +346,38 @@ namespace Gidrolock_Modbus_Scanner
                 buttonCleaning.Text = cleaningStatus ? "Выключить" : "Включить";
             }
         }
+
+        private async void buttonSetSpeed_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                string str = cBoxSpeed.Items[cBoxSpeed.SelectedIndex].ToString();
+                str = str.Substring(0, str.Length - 2); //clip off two zeroes at the end
+                ushort newSpeed = (ushort)Int16.Parse(str);
+                //Console.WriteLine("Baudrate: " + newSpeed);
+
+                // send speed value to device
+                // await for response
+                Modbus.WriteSingleAsync(FunctionCode.WriteRegister, modbusID, device.baudRate.address, newSpeed);
+                await Task.Delay(2000).ContinueWith(_ =>
+                {
+                    if (isAwaitingResponse)
+                    {
+                        MessageBox.Show("Превышено время ожидания ответа от устройства.");
+                        isAwaitingResponse = false;
+                    }
+                    return false;
+                });
+                while (isAwaitingResponse) { continue; }
+                if (latestMessage.Status != ModbusStatus.Error)
+                {
+                    port.Close();
+                    port.BaudRate = newSpeed;
+                    port.Open();
+                }
+            }
+            catch (Exception ex) { MessageBox.Show(ex.Message); }
+        }
     }
     public class Sensor : FlowLayoutPanel
     {

@@ -30,6 +30,9 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Datasheet));
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.cBoxSpeed = new System.Windows.Forms.ComboBox();
+            this.buttonSetSpeed = new System.Windows.Forms.Button();
+            this.label8 = new System.Windows.Forms.Label();
             this.labelBattery = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
             this.buttonPoll = new System.Windows.Forms.Button();
@@ -52,9 +55,6 @@
             this.label4 = new System.Windows.Forms.Label();
             this.sensorPanel = new System.Windows.Forms.FlowLayoutPanel();
             this.label9 = new System.Windows.Forms.Label();
-            this.button1 = new System.Windows.Forms.Button();
-            this.label8 = new System.Windows.Forms.Label();
-            this.cBoxSpeed = new System.Windows.Forms.ComboBox();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudModbusID)).BeginInit();
             this.groupBox2.SuspendLayout();
@@ -63,7 +63,7 @@
             // groupBox1
             // 
             this.groupBox1.Controls.Add(this.cBoxSpeed);
-            this.groupBox1.Controls.Add(this.button1);
+            this.groupBox1.Controls.Add(this.buttonSetSpeed);
             this.groupBox1.Controls.Add(this.label8);
             this.groupBox1.Controls.Add(this.labelBattery);
             this.groupBox1.Controls.Add(this.label6);
@@ -81,6 +81,34 @@
             this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Инфо";
+            // 
+            // cBoxSpeed
+            // 
+            this.cBoxSpeed.FormattingEnabled = true;
+            this.cBoxSpeed.Location = new System.Drawing.Point(74, 97);
+            this.cBoxSpeed.Name = "cBoxSpeed";
+            this.cBoxSpeed.Size = new System.Drawing.Size(73, 21);
+            this.cBoxSpeed.TabIndex = 13;
+            this.cBoxSpeed.Text = "9600";
+            // 
+            // buttonSetSpeed
+            // 
+            this.buttonSetSpeed.Location = new System.Drawing.Point(153, 94);
+            this.buttonSetSpeed.Name = "buttonSetSpeed";
+            this.buttonSetSpeed.Size = new System.Drawing.Size(75, 23);
+            this.buttonSetSpeed.TabIndex = 12;
+            this.buttonSetSpeed.Text = "Изменить";
+            this.buttonSetSpeed.UseVisualStyleBackColor = true;
+            this.buttonSetSpeed.Click += new System.EventHandler(this.buttonSetSpeed_Click);
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(6, 99);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(58, 13);
+            this.label8.TabIndex = 10;
+            this.label8.Text = "Скорость:";
             // 
             // labelBattery
             // 
@@ -297,33 +325,6 @@
             this.label9.TabIndex = 5;
             this.label9.Text = "Датчики";
             // 
-            // button1
-            // 
-            this.button1.Location = new System.Drawing.Point(153, 94);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 12;
-            this.button1.Text = "Изменить";
-            this.button1.UseVisualStyleBackColor = true;
-            // 
-            // label8
-            // 
-            this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(6, 99);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(58, 13);
-            this.label8.TabIndex = 10;
-            this.label8.Text = "Скорость:";
-            // 
-            // cBoxSpeed
-            // 
-            this.cBoxSpeed.FormattingEnabled = true;
-            this.cBoxSpeed.Location = new System.Drawing.Point(74, 97);
-            this.cBoxSpeed.Name = "cBoxSpeed";
-            this.cBoxSpeed.Size = new System.Drawing.Size(73, 21);
-            this.cBoxSpeed.TabIndex = 13;
-            this.cBoxSpeed.Text = "9600";
-            // 
             // Datasheet
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -373,7 +374,7 @@
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label labelBattery;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button buttonSetSpeed;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.ComboBox cBoxSpeed;
     }
