@@ -291,6 +291,7 @@ namespace Gidrolock_Modbus_Scanner
                     d.name = "Standard Wi-Fi RS485";
                     d.id = 30;
                     d.modelName = "STW485";
+                    d.firmware = new Entry(RegisterType.Input, 250, 6);
                     d.baudRate = new Entry(RegisterType.Holding, 110);
 
                     d.valveStatus = new Entry(RegisterType.Coil, 1202);
@@ -310,11 +311,15 @@ namespace Gidrolock_Modbus_Scanner
                     break;
                 case DeviceType.Inteli:
                     d.modelName = "Inteli";
+                    d.id = 26;
+                    d.modelName = "INTELI";
+                    d.baudRate = new Entry(RegisterType.Holding, 129);
                     break;
                 case DeviceType.PremiumPlus:
                     d.name = "Premium Plus Wi-Fi";
                     d.id = 30;
                     d.modelName = "PRPLS1";
+                    d.firmware = new Entry(RegisterType.Input, 250, 6);
                     d.baudRate = new Entry(RegisterType.Holding, 110);
 
                     d.valveStatus = new Entry(RegisterType.Coil, 1202);

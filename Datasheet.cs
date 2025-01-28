@@ -206,7 +206,7 @@ namespace Gidrolock_Modbus_Scanner
                     for (int i = 1; i < latestMessage.Data.Length; i += 2)
                         values.Add(latestMessage.Data[i]);
                     int add = device.wiredSensors + (device.hasScenarioSensor ? 1 : 0);
-                    for (int i = 0; i < sensorPanel.Controls.Count; i++)
+                    for (int i = 0; i < sensorPanel.Controls.Count - add; i++)
                     {
 
                         WirelessSensor snsr = sensorPanel.Controls[i + add] as WirelessSensor;

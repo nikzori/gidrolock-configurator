@@ -1,4 +1,4 @@
-# Gidrolock Modbus Scanner
+# Gidrolock Device Configurator
 
 Приложение для быстрого и удобного подключения и настройки умных систем защиты от протечек [Gidrolock](https://gidrolock.ru) через протокол Modbus. 
 

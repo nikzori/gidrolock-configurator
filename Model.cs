@@ -8,6 +8,7 @@ namespace Gidrolock_Modbus_Scanner
         public string name;
         public byte id;
         public string modelName;
+        public Entry firmware;
         public Entry baudRate;
 
         public Entry valveStatus;
