@@ -7,3 +7,4 @@
 Поддерживаемые устройства:
 - Standard Wi-Fi RS485
 - Premium Plus
+
