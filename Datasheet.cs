@@ -239,7 +239,7 @@ namespace Gidrolock_Modbus_Scanner
             bool res = false;
             Modbus.ReadRegAsync(modbusID, (FunctionCode)entry.registerType, entry.address, entry.length);
             isAwaitingResponse = true;
-            await Task.Delay(2000).ContinueWith(_ =>
+            Task.Delay(2000).ContinueWith(_ =>
             {
                 if (isAwaitingResponse)
                 {
