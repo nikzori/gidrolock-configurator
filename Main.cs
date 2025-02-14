@@ -45,7 +45,8 @@ namespace Gidrolock_Modbus_Scanner
             upDownModbusID.Minimum = 1;
             upDownModbusID.Maximum = 247;
 
-            models.Add("Standard", "STW485");
+            models.Add("Standard Wi-Fi", "STW485");
+            models.Add("Standard Radio", "STR485");
             models.Add("Premium Plus", "PRPLS1");
             models.Add("Inteli", "INTELI");
             models.Add("Premium", "BUP485");
@@ -287,7 +288,7 @@ namespace Gidrolock_Modbus_Scanner
             Device d = new Device();
             switch (dt)
             {
-                case DeviceType.Standard:
+                case DeviceType.StandardWifi:
                     d.name = "Standard Wi-Fi RS485";
                     d.id = 30;
                     d.modelName = "STW485";
@@ -305,6 +306,28 @@ namespace Gidrolock_Modbus_Scanner
                     d.wiredSensors = 2;
                     d.hasScenarioSensor = true;
                     d.sensorAlarm = new Entry(RegisterType.Discrete, 1343, 24);
+
+                    d.radioStatus = new Entry(RegisterType.Input, 1215, 21);
+
+                    break;
+                case DeviceType.StandardRadio:
+                    d.name = "Standard Radio RS485";
+                    d.id = 30;
+                    d.modelName = "STR485";
+                    d.firmware = new Entry(RegisterType.Input, 250, 6);
+                    d.baudRate = new Entry(RegisterType.Holding, 110);
+
+                    d.valveStatus = new Entry(RegisterType.Coil, 1202);
+                    d.alarmStatus = new Entry(RegisterType.Coil, 1201);
+
+                    d.hasCleaningMode = true;
+                    d.cleaningMode = new Entry(RegisterType.Coil, 3);
+
+                    d.hasBattery = false;
+
+                    d.wiredSensors = 2;
+                    d.hasScenarioSensor = false;
+                    d.sensorAlarm = new Entry(RegisterType.Discrete, 1343, 23);
 
                     d.radioStatus = new Entry(RegisterType.Input, 1215, 21);
 
@@ -355,4 +378,4 @@ public enum FunctionCode { ReadCoil = 1, ReadDiscrete = 2, ReadHolding = 3, Read
 //public enum SelectedPath { File, Folder };
 
 
-public enum DeviceType { Standard, PremiumPlus, Inteli, Premium };
+public enum DeviceType { StandardWifi, StandardRadio, PremiumPlus, Inteli, Premium };
