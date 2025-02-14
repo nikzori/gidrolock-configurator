@@ -119,7 +119,12 @@ namespace Gidrolock_Modbus_Scanner
                         buttonValve.Text = "Закрыть";
                     }
                 }
-
+                res = await PollEntry(device.firmware);
+                Console.WriteLine("Polling for alarm status, poll success: " + res);
+                if (res)
+                {
+                    labelFirmware.Text = App.ByteArrayToUnicode(latestMessage.Data);
+                }
                 res = await PollEntry(device.alarmStatus);
                 Console.WriteLine("Polling for alarm status, poll success: " + res);
                 if (res)
