@@ -102,7 +102,23 @@ namespace Gidrolock_Modbus_Scanner
             // hardcoded for now, probably easier to keep it like this in the future
             try
             {
-                bool res = await PollEntry(device.valveStatus); // for some reason main thread doesn't go
+                bool res = await PollEntry(device.firmware);
+                Console.WriteLine("Polling for alarm status, poll success: " + res);
+                if (res)
+                {
+                    labelFirmware.Text = App.ByteArrayToUnicode(latestMessage.Data);
+                }
+
+                if (device.hasBattery)
+                {
+                    res = await PollEntry(device.batteryCharge);
+                    if (res)
+                    {
+                        labelBattery.Text = latestMessage.Data.Last().ToString();
+                    }
+                }
+
+                res = await PollEntry(device.valveStatus); 
                 Console.WriteLine("Polling for valve status, poll success: " + res);
                 if (res)
                 {
@@ -119,16 +135,13 @@ namespace Gidrolock_Modbus_Scanner
                         buttonValve.Text = "Закрыть";
                     }
                 }
-                res = await PollEntry(device.firmware);
-                Console.WriteLine("Polling for alarm status, poll success: " + res);
-                if (res)
-                {
-                    labelFirmware.Text = App.ByteArrayToUnicode(latestMessage.Data);
-                }
+
                 res = await PollEntry(device.alarmStatus);
                 Console.WriteLine("Polling for alarm status, poll success: " + res);
                 if (res)
                 {
+                    Console.WriteLine("Alarm data: " + Modbus.ByteArrayToString(latestMessage.Data));
+                    Console.WriteLine("Alarm data.last: " + latestMessage.Data.Last().ToString());
                     if (latestMessage.Data.Last() > 0)
                     {
                         alarmStatus = true;
@@ -151,42 +164,14 @@ namespace Gidrolock_Modbus_Scanner
                         if (latestMessage.Data.Last() > 0)
                         {
                             cleaningStatus = true;
-                            buttonAlarm.Text = "Выключить";
-                            labelAlarm.Text = "вкл";
+                            buttonCleaning.Text = "Выключить";
+                            labelCleaning.Text = "вкл";
                         }
                         else
                         {
                             cleaningStatus = false;
-                            buttonAlarm.Text = "Включить";
-                            labelAlarm.Text = "выкл";
-                        }
-                    }
-                }
-
-                if (device.hasBattery)
-                {
-                    res = await PollEntry(device.batteryCharge);
-                    if (res)
-                    {
-                        labelBattery.Text = latestMessage.Data.Last().ToString();
-                    }
-                }
-                if (device.hasCleaningMode)
-                {
-                    res = await PollEntry(device.cleaningMode);
-                    if (res)
-                    {
-                        if (latestMessage.Data.Last() > 0)
-                        {
-                            cleaningStatus = true;
-                            buttonAlarm.Text = "Выключить";
-                            labelAlarm.Text = "вкл";
-                        }
-                        else
-                        {
-                            cleaningStatus = false;
-                            buttonAlarm.Text = "Включить";
-                            labelAlarm.Text = "выкл";
+                            buttonCleaning.Text = "Включить";
+                            labelCleaning.Text = "выкл";
                         }
                     }
                 }
@@ -285,7 +270,7 @@ namespace Gidrolock_Modbus_Scanner
             ushort value = isValveClosed ? (ushort)0: (ushort)0xFF00;
             Modbus.WriteSingleAsync(FunctionCode.WriteCoil, modbusID, device.valveStatus.address, value);
 
-            await Task.Delay(2000).ContinueWith(_ =>
+            Task.Delay(2000).ContinueWith(_ =>
             {
                 if (isAwaitingResponse)
                 {
@@ -309,7 +294,7 @@ namespace Gidrolock_Modbus_Scanner
             ushort value = alarmStatus ? (ushort)0 : (ushort)0xFF00;
             Modbus.WriteSingleAsync(FunctionCode.WriteCoil, modbusID, device.alarmStatus.address, value);
 
-            await Task.Delay(2000).ContinueWith(_ =>
+            Task.Delay(2000).ContinueWith(_ =>
             {
                 if (isAwaitingResponse)
                 {
@@ -333,7 +318,7 @@ namespace Gidrolock_Modbus_Scanner
             ushort value = cleaningStatus ? (ushort)0 : (ushort)0xFF00;
             Modbus.WriteSingleAsync(FunctionCode.WriteCoil, modbusID, device.cleaningMode.address, value);
 
-            await Task.Delay(2000).ContinueWith(_ =>
+            Task.Delay(2000).ContinueWith(_ =>
             {
                 if (isAwaitingResponse)
                 {
@@ -364,7 +349,7 @@ namespace Gidrolock_Modbus_Scanner
                 // send speed value to device
                 // await for response
                 Modbus.WriteSingleAsync(FunctionCode.WriteRegister, modbusID, device.baudRate.address, newSpeed);
-                await Task.Delay(2000).ContinueWith(_ =>
+                Task.Delay(2000).ContinueWith(_ =>
                 {
                     if (isAwaitingResponse)
                     {
