@@ -134,7 +134,8 @@ namespace Gidrolock_Modbus_Scanner
                     });
 
                     while (isAwaitingResponse) { continue; }
-
+                    if (latestMessage is null)
+                        return;
                     if (latestMessage.Status == ModbusStatus.Error)
                         return;
 

@@ -2,8 +2,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.IO.Ports;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -27,10 +29,24 @@ namespace Gidrolock_Modbus_Scanner
 
         List<WiredSensor> wiredSensors = new List<WiredSensor>();
         List<WirelessSensor> wirelessSensors;
-        
+        public static string firmwarePath;
 
 
-        public Datasheet(byte modbusID, Device device) : base()
+
+        Thread fileThread = new Thread((ThreadStart)delegate
+        {
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.InitialDirectory = Application.StartupPath;
+            ofd.RestoreDirectory = true;
+
+            if (ofd.ShowDialog() == DialogResult.OK)
+            {
+                firmwarePath = ofd.FileName;
+                //firmwarePathLabel.Text = ofd.FileName;
+            }              
+        });
+
+    public Datasheet(byte modbusID, Device device) : base()
         {
             InitializeComponent();
 
@@ -70,7 +86,7 @@ namespace Gidrolock_Modbus_Scanner
                 WiredSensor ws = new WiredSensor(i) { Width = 495, Height = 24 };
                 sensorPanel.Controls.Add(ws);
                 ws.Visible = true;
-                
+
             }
             if (device.hasScenarioSensor)
             {
@@ -94,7 +110,7 @@ namespace Gidrolock_Modbus_Scanner
                 sensorPanel.Controls[i].BackColor = i % 2 == 0 ? Color.White : Color.LightGray;
 
 
-            sensorPanel.Update();
+            sensorPanel.Update();            
         }
 
         private async void buttonPoll_Click(object sender, EventArgs e)
@@ -118,7 +134,7 @@ namespace Gidrolock_Modbus_Scanner
                     }
                 }
 
-                res = await PollEntry(device.valveStatus); 
+                res = await PollEntry(device.valveStatus);
                 Console.WriteLine("Polling for valve status, poll success: " + res);
                 if (res)
                 {
@@ -267,7 +283,7 @@ namespace Gidrolock_Modbus_Scanner
 
         private async void buttonValve_Click(object sender, EventArgs e)
         {
-            ushort value = isValveClosed ? (ushort)0: (ushort)0xFF00;
+            ushort value = isValveClosed ? (ushort)0 : (ushort)0xFF00;
             Modbus.WriteSingleAsync(FunctionCode.WriteCoil, modbusID, device.valveStatus.address, value);
 
             Task.Delay(2000).ContinueWith(_ =>
@@ -367,6 +383,86 @@ namespace Gidrolock_Modbus_Scanner
                 }
             }
             catch (Exception ex) { MessageBox.Show(ex.Message); }
+        }
+
+        private void BrowseFirmware_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                fileThread.TrySetApartmentState(ApartmentState.STA);
+                fileThread.Start();
+                while (!fileThread.IsAlive) { Thread.Sleep(1); }
+                Thread.Sleep(1);
+                fileThread.Join();
+            }
+            catch (Exception err) { MessageBox.Show(err.Message); }
+        }
+
+        private void WriteFirmware_Click(object sender, EventArgs e)
+        {
+            FileStream fileStream = File.OpenRead(firmwarePath);
+            long bytesLeft = fileStream.Length;
+            int offset = 0;
+            int count;
+            byte[] buffer;
+            byte[] bdma;
+            List<byte> message;
+            int dma = 0;
+            Task.Run(() =>
+            {
+                while (bytesLeft > 0)
+                {
+                    count = bytesLeft > 64 ? 64 : (int)bytesLeft;
+                    buffer = new byte[count];
+                    fileStream.Read(buffer, offset, count);
+
+
+                    bdma = new byte[2];
+                    bdma[0] = (byte)((dma & 0xFF_00) >> 16);
+                    bdma[1] = (byte)(dma & 0x00_FF);
+
+                    message = new List<byte>();
+                    message.Add(modbusID);  // device ID
+                    message.Add(0x10);      // function code
+                    message.Add(0xFF);      // register address
+                    message.Add(0xFF);      // register address
+                    message.Add(0x00);      // regCnt (?)
+                    message.Add(0x21);      // regCnt (?)
+                    message.Add(0x42);      // data bytecount
+                    message.Add(bdma[0]);
+                    message.Add(bdma[1]);
+
+
+                    for (int i = 0; i < buffer.Length; i++)
+                    {
+                        message.Add(buffer[i]);
+                    }
+                    byte[] CRC = new byte[2];
+                    Modbus.GetCRC(message.ToArray(), ref CRC);
+                    message.Add(CRC[0]);
+                    message.Add(CRC[1]);
+
+                    Console.WriteLine("Outgoing firmware message: " + Modbus.ByteArrayToString(message.ToArray()));
+
+                    isAwaitingResponse = true;
+                    port.Write(message.ToArray(), 0, message.Count);
+
+                    Task.Delay(2000).ContinueWith(_ =>
+                    {
+                        if (isAwaitingResponse)
+                        {
+                            MessageBox.Show("Превышено время ожидания ответа от устройства.");
+                            isAwaitingResponse = false;
+                            return;
+                        }
+                    });
+                    while (isAwaitingResponse) { continue; }
+
+                    bytesLeft -= count;
+                    offset += count;
+                    dma += 32;
+                }
+            });
         }
     }
     public class Sensor : FlowLayoutPanel

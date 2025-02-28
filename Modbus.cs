@@ -210,7 +210,7 @@ namespace Gidrolock_Modbus_Scanner
 
 
         #region CRC Computation
-        static void GetCRC(byte[] message, ref byte[] CRC)
+        public static void GetCRC(byte[] message, ref byte[] CRC)
         {
             //Function expects a modbus message of any length as well as a 2 byte CRC array in which to 
             //return the CRC values:

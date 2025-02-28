@@ -55,9 +55,15 @@
             this.label4 = new System.Windows.Forms.Label();
             this.sensorPanel = new System.Windows.Forms.FlowLayoutPanel();
             this.label9 = new System.Windows.Forms.Label();
+            this.BrowseFirmware = new System.Windows.Forms.Button();
+            this.label11 = new System.Windows.Forms.Label();
+            this.firmwarePathLabel = new System.Windows.Forms.Label();
+            this.WriteFirmware = new System.Windows.Forms.Button();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudModbusID)).BeginInit();
             this.groupBox2.SuspendLayout();
+            this.groupBox3.SuspendLayout();
             this.SuspendLayout();
             // 
             // groupBox1
@@ -312,7 +318,7 @@
             this.sensorPanel.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
             this.sensorPanel.Location = new System.Drawing.Point(13, 168);
             this.sensorPanel.Name = "sensorPanel";
-            this.sensorPanel.Size = new System.Drawing.Size(512, 248);
+            this.sensorPanel.Size = new System.Drawing.Size(512, 262);
             this.sensorPanel.TabIndex = 4;
             this.sensorPanel.WrapContents = false;
             // 
@@ -325,11 +331,63 @@
             this.label9.TabIndex = 5;
             this.label9.Text = "Датчики";
             // 
+            // BrowseFirmware
+            // 
+            this.BrowseFirmware.Location = new System.Drawing.Point(6, 38);
+            this.BrowseFirmware.Name = "BrowseFirmware";
+            this.BrowseFirmware.Size = new System.Drawing.Size(75, 23);
+            this.BrowseFirmware.TabIndex = 14;
+            this.BrowseFirmware.Text = "Обзор";
+            this.BrowseFirmware.UseVisualStyleBackColor = true;
+            this.BrowseFirmware.Click += new System.EventHandler(this.BrowseFirmware_Click);
+            // 
+            // label11
+            // 
+            this.label11.AutoSize = true;
+            this.label11.Location = new System.Drawing.Point(4, 22);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(34, 13);
+            this.label11.TabIndex = 16;
+            this.label11.Text = "Путь:";
+            // 
+            // firmwarePathLabel
+            // 
+            this.firmwarePathLabel.AutoSize = true;
+            this.firmwarePathLabel.Location = new System.Drawing.Point(44, 22);
+            this.firmwarePathLabel.Name = "firmwarePathLabel";
+            this.firmwarePathLabel.Size = new System.Drawing.Size(126, 13);
+            this.firmwarePathLabel.TabIndex = 17;
+            this.firmwarePathLabel.Text = "C:\\Path\\To\\Firmware.bin";
+            // 
+            // WriteFirmware
+            // 
+            this.WriteFirmware.Location = new System.Drawing.Point(87, 38);
+            this.WriteFirmware.Name = "WriteFirmware";
+            this.WriteFirmware.Size = new System.Drawing.Size(75, 23);
+            this.WriteFirmware.TabIndex = 18;
+            this.WriteFirmware.Text = "Прошить";
+            this.WriteFirmware.UseVisualStyleBackColor = true;
+            this.WriteFirmware.Click += new System.EventHandler(this.WriteFirmware_Click);
+            // 
+            // groupBox3
+            // 
+            this.groupBox3.Controls.Add(this.BrowseFirmware);
+            this.groupBox3.Controls.Add(this.WriteFirmware);
+            this.groupBox3.Controls.Add(this.label11);
+            this.groupBox3.Controls.Add(this.firmwarePathLabel);
+            this.groupBox3.Location = new System.Drawing.Point(13, 436);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Size = new System.Drawing.Size(512, 72);
+            this.groupBox3.TabIndex = 19;
+            this.groupBox3.TabStop = false;
+            this.groupBox3.Text = "Прошивка";
+            // 
             // Datasheet
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(537, 428);
+            this.ClientSize = new System.Drawing.Size(537, 511);
+            this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.label9);
             this.Controls.Add(this.sensorPanel);
             this.Controls.Add(this.groupBox2);
@@ -344,6 +402,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.nudModbusID)).EndInit();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
+            this.groupBox3.ResumeLayout(false);
+            this.groupBox3.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -377,5 +437,10 @@
         private System.Windows.Forms.Button buttonSetSpeed;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.ComboBox cBoxSpeed;
+        private System.Windows.Forms.Button BrowseFirmware;
+        private System.Windows.Forms.Label label11;
+        private System.Windows.Forms.Label firmwarePathLabel;
+        private System.Windows.Forms.Button WriteFirmware;
+        private System.Windows.Forms.GroupBox groupBox3;
     }
 }
