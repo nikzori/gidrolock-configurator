@@ -244,8 +244,9 @@ namespace Gidrolock_Modbus_Scanner
         async Task<bool> PollEntry(Entry entry)
         {
             bool res = false;
-            Modbus.ReadRegAsync(modbusID, (FunctionCode)entry.registerType, entry.address, entry.length);
             isAwaitingResponse = true;
+            Modbus.ReadRegAsync(modbusID, (FunctionCode)entry.registerType, entry.address, entry.length);
+            
 
             stopwatch.Restart();
 
