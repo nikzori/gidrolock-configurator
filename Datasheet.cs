@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.IO.Ports;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -20,7 +22,7 @@ namespace Gidrolock_Modbus_Scanner
 
         SerialPort port = Modbus.port;
         bool isPolling = false;
-        bool isAwaitingResponse = false;
+        static bool isAwaitingResponse = false;
 
 
         bool isValveClosed = false;
@@ -31,7 +33,8 @@ namespace Gidrolock_Modbus_Scanner
         List<WirelessSensor> wirelessSensors;
         public static string firmwarePath;
 
-
+        static int timeout = 1000;
+        Stopwatch stopwatch = new Stopwatch();
 
         Thread fileThread = new Thread((ThreadStart)delegate
         {
@@ -40,16 +43,14 @@ namespace Gidrolock_Modbus_Scanner
             ofd.RestoreDirectory = true;
 
             if (ofd.ShowDialog() == DialogResult.OK)
-            {
                 firmwarePath = ofd.FileName;
-                //firmwarePathLabel.Text = ofd.FileName;
-            }              
         });
 
-    public Datasheet(byte modbusID, Device device) : base()
+        public Datasheet(byte modbusID, Device device) : base()
         {
             InitializeComponent();
-
+            firmwareProgressBar.Minimum = 0;
+            firmwareProgressBar.Maximum = 100;
             nudModbusID.Minimum = 1;
             nudModbusID.Maximum = 246;
             nudModbusID.Value = modbusID;
@@ -110,7 +111,7 @@ namespace Gidrolock_Modbus_Scanner
                 sensorPanel.Controls[i].BackColor = i % 2 == 0 ? Color.White : Color.LightGray;
 
 
-            sensorPanel.Update();            
+            sensorPanel.Update();
         }
 
         private async void buttonPoll_Click(object sender, EventArgs e)
@@ -245,15 +246,17 @@ namespace Gidrolock_Modbus_Scanner
             bool res = false;
             Modbus.ReadRegAsync(modbusID, (FunctionCode)entry.registerType, entry.address, entry.length);
             isAwaitingResponse = true;
-            Task.Delay(2000).ContinueWith(_ =>
+
+            stopwatch.Restart();
+
+            while (isAwaitingResponse)
             {
-                if (isAwaitingResponse)
+                if (stopwatch.ElapsedMilliseconds > 1000)
                 {
-                    MessageBox.Show("Превышено время ожидания ответа от устройства.");
-                    isAwaitingResponse = false;
+                    Console.WriteLine("Response timed out.");
+                    break;
                 }
-            });
-            while (isAwaitingResponse) { continue; }
+            }
 
             if (latestMessage != null && latestMessage.Status != ModbusStatus.Error)
                 res = true;
@@ -265,17 +268,18 @@ namespace Gidrolock_Modbus_Scanner
         private async void buttonSetID_Click(object sender, EventArgs e)
         {
             byte newID = (byte)nudModbusID.Value; // should prevent assigning wrong ID if UpDown is fiddled with in the middle of request 
+            isAwaitingResponse = true;
             Modbus.WriteSingleAsync(FunctionCode.WriteRegister, modbusID, 128, newID);
-            await Task.Delay(2000).ContinueWith(_ =>
+
+            stopwatch.Restart();
+            while (isAwaitingResponse)
             {
-                if (isAwaitingResponse)
+                if (stopwatch.ElapsedMilliseconds > 1000)
                 {
-                    MessageBox.Show("Превышено время ожидания ответа от устройства.");
-                    isAwaitingResponse = false;
+                    Console.WriteLine("Response timed out.");
+                    break;
                 }
-                return false;
-            });
-            while (isAwaitingResponse) { continue; }
+            }
 
             if (latestMessage != null && latestMessage.Status != ModbusStatus.Error)
                 modbusID = newID;
@@ -284,18 +288,18 @@ namespace Gidrolock_Modbus_Scanner
         private async void buttonValve_Click(object sender, EventArgs e)
         {
             ushort value = isValveClosed ? (ushort)0 : (ushort)0xFF00;
+            isAwaitingResponse = true;
             Modbus.WriteSingleAsync(FunctionCode.WriteCoil, modbusID, device.valveStatus.address, value);
 
-            Task.Delay(2000).ContinueWith(_ =>
+            stopwatch.Restart();
+            while (isAwaitingResponse)
             {
-                if (isAwaitingResponse)
+                if (stopwatch.ElapsedMilliseconds > 1000)
                 {
-                    MessageBox.Show("Превышено время ожидания ответа от устройства.");
-                    isAwaitingResponse = false;
+                    Console.WriteLine("Response timed out.");
+                    break;
                 }
-                return false;
-            });
-            while (isAwaitingResponse) { continue; }
+            }
 
             if (latestMessage != null && latestMessage.Status != ModbusStatus.Error)
             {
@@ -308,18 +312,18 @@ namespace Gidrolock_Modbus_Scanner
         private async void buttonAlarm_Click(object sender, EventArgs e)
         {
             ushort value = alarmStatus ? (ushort)0 : (ushort)0xFF00;
+            isAwaitingResponse = true;
             Modbus.WriteSingleAsync(FunctionCode.WriteCoil, modbusID, device.alarmStatus.address, value);
 
-            Task.Delay(2000).ContinueWith(_ =>
+            stopwatch.Restart();
+            while (isAwaitingResponse)
             {
-                if (isAwaitingResponse)
+                if (stopwatch.ElapsedMilliseconds > 1000)
                 {
-                    MessageBox.Show("Превышено время ожидания ответа от устройства.");
-                    isAwaitingResponse = false;
+                    Console.WriteLine("Response timed out.");
+                    break;
                 }
-                return false;
-            });
-            while (isAwaitingResponse) { continue; }
+            }
 
             if (latestMessage != null && latestMessage.Status != ModbusStatus.Error)
             {
@@ -332,18 +336,18 @@ namespace Gidrolock_Modbus_Scanner
         private async void buttonCleaning_Click(object sender, EventArgs e)
         {
             ushort value = cleaningStatus ? (ushort)0 : (ushort)0xFF00;
+            isAwaitingResponse = true;
             Modbus.WriteSingleAsync(FunctionCode.WriteCoil, modbusID, device.cleaningMode.address, value);
 
-            Task.Delay(2000).ContinueWith(_ =>
+            stopwatch.Restart();
+            while (isAwaitingResponse)
             {
-                if (isAwaitingResponse)
+                if (stopwatch.ElapsedMilliseconds > 1000)
                 {
-                    MessageBox.Show("Превышено время ожидания ответа от устройства.");
-                    isAwaitingResponse = false;
+                    Console.WriteLine("Response timed out.");
+                    break;
                 }
-                return false;
-            });
-            while (isAwaitingResponse) { continue; }
+            }
 
             if (latestMessage != null && latestMessage.Status != ModbusStatus.Error)
             {
@@ -364,18 +368,20 @@ namespace Gidrolock_Modbus_Scanner
 
                 // send speed value to device
                 // await for response
+                isAwaitingResponse = true;
                 Modbus.WriteSingleAsync(FunctionCode.WriteRegister, modbusID, device.baudRate.address, newSpeed);
-                Task.Delay(2000).ContinueWith(_ =>
+
+                stopwatch.Restart();
+                while (isAwaitingResponse)
                 {
-                    if (isAwaitingResponse)
+                    if (stopwatch.ElapsedMilliseconds > 1000)
                     {
-                        MessageBox.Show("Превышено время ожидания ответа от устройства.");
-                        isAwaitingResponse = false;
+                        Console.WriteLine("Response timed out.");
+                        break;
                     }
-                    return false;
-                });
-                while (isAwaitingResponse) { continue; }
-                if (latestMessage.Status != ModbusStatus.Error)
+                }
+
+                if (latestMessage != null && latestMessage.Status != ModbusStatus.Error)
                 {
                     port.Close();
                     port.BaudRate = newSpeed;
@@ -396,30 +402,54 @@ namespace Gidrolock_Modbus_Scanner
                 fileThread.Join();
             }
             catch (Exception err) { MessageBox.Show(err.Message); }
+
+            firmwarePathLabel.Invoke(new MethodInvoker(delegate { firmwarePathLabel.Text = firmwarePath; }));
         }
 
-        private void WriteFirmware_Click(object sender, EventArgs e)
+        private async void WriteFirmware_Click(object sender, EventArgs e)
         {
+            if (firmwarePath is null || firmwarePath.Length == 0)
+            {
+                MessageBox.Show("Выберите файл прошивки.");
+                return;
+            }
+            
             FileStream fileStream = File.OpenRead(firmwarePath);
             long bytesLeft = fileStream.Length;
-            int offset = 0;
-            int count;
-            byte[] buffer;
+            long bytesTotal = fileStream.Length;
+            int count = 64;
+            byte[] buffer = new byte[count];
             byte[] bdma;
+            short _flashAddr = 0;
+            byte[] flashAddr = new byte[2];
+            byte[] CRC;
             List<byte> message;
-            int dma = 0;
-            Task.Run(() =>
+            bool responseReceived = false;
+            Modbus.ResponseReceived += (sndr, msg) => { responseReceived = true; };
+            bool firstMessageSent = false;
+            long bytesWritten = 0;
+            await Task.Run(() =>
             {
                 while (bytesLeft > 0)
                 {
+                    if (firstMessageSent) // after first message the device is sent into recovery mode which only supports 9600 bps
+                    {
+                        port.Close();
+                        port.BaudRate = 9600;
+                        port.Open();
+                    }
+
                     count = bytesLeft > 64 ? 64 : (int)bytesLeft;
                     buffer = new byte[count];
-                    fileStream.Read(buffer, offset, count);
+                    fileStream.Read(buffer, 0, count);
 
 
                     bdma = new byte[2];
-                    bdma[0] = (byte)((dma & 0xFF_00) >> 16);
-                    bdma[1] = (byte)(dma & 0x00_FF);
+                    bdma[0] = (byte)((bytesLeft & 0xFF_00) >> 8);
+                    bdma[1] = (byte)(bytesLeft & 0x00_FF);
+
+                    flashAddr[0] = (byte)((_flashAddr & 0xFF_00) >> 8);
+                    flashAddr[1] = (byte)(_flashAddr & 0x00_FF);
 
                     message = new List<byte>();
                     message.Add(modbusID);  // device ID
@@ -429,40 +459,101 @@ namespace Gidrolock_Modbus_Scanner
                     message.Add(0x00);      // regCnt (?)
                     message.Add(0x21);      // regCnt (?)
                     message.Add(0x42);      // data bytecount
-                    message.Add(bdma[0]);
-                    message.Add(bdma[1]);
 
+                    message.Add(flashAddr[0]);
+                    message.Add(flashAddr[1]);
 
-                    for (int i = 0; i < buffer.Length; i++)
+                    try
                     {
-                        message.Add(buffer[i]);
+                        for (int i = 0; i < buffer.Length; i++)
+                        {
+                            message.Add(buffer[i]);
+                        }
+                        message.Add(0x00);
+                        message.Add(0x00);
+                        CRC = new byte[2];
+                        Modbus.GetCRC(message.ToArray(), ref CRC);
+                        message[message.Count - 2] = CRC[0];
+                        message[message.Count - 1] = CRC[1];
+
+                        Console.WriteLine("Outgoing firmware message: " + Modbus.ByteArrayToString(message.ToArray()));
                     }
-                    byte[] CRC = new byte[2];
-                    Modbus.GetCRC(message.ToArray(), ref CRC);
-                    message.Add(CRC[0]);
-                    message.Add(CRC[1]);
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message);
+                        return;
+                    }
 
-                    Console.WriteLine("Outgoing firmware message: " + Modbus.ByteArrayToString(message.ToArray()));
+                    responseReceived = false;
+                    
 
+                    while (true)
+                    {
+                        
+                        isAwaitingResponse = true;
+                        port.Write(message.ToArray(), 0, message.Count);
+                        stopwatch.Restart();
+
+                        while (isAwaitingResponse) 
+                        {
+                            if (stopwatch.ElapsedMilliseconds > 1000)
+                            {
+                                Console.WriteLine("Response timed out.");
+                                break;
+                            }
+                        }
+                        
+                        if (responseReceived)
+                            break;
+                    }
+                    bytesLeft -= count;
+                    bytesWritten += count;
+                    firmwareProgressBar.Increment( (int)(bytesWritten / bytesTotal) * 100 );
+                    
+                    _flashAddr += (short)count;
+                    if (port.BaudRate != 9600)
+                        firstMessageSent = true;
+
+                    if (bytesLeft <= 0)
+                        Console.WriteLine("Reached the end of firmware file.");
+                }
+
+                /* Final Message */
+                message = new List<byte>(); 
+                message.Add(modbusID);  // device ID
+                message.Add(0x10);      // function code
+                message.Add(0xFF);      // register address
+                message.Add(0xFF);      // register address
+                message.Add(0x00);      // regCnt (?)
+                message.Add(0x21);      // regCnt (?)
+                message.Add(0x00);      // data bytecount
+                message.Add(0x00);      // CRC
+                message.Add(0x00);      // CRC
+                CRC = new byte[2];
+                Modbus.GetCRC(message.ToArray(), ref CRC);
+                message[message.Count - 2] = CRC[0];
+                message[message.Count - 1] = CRC[1];
+                Console.WriteLine("Outgoing firmware message: " + Modbus.ByteArrayToString(message.ToArray()));
+
+                while (true)
+                {
                     isAwaitingResponse = true;
                     port.Write(message.ToArray(), 0, message.Count);
+                    stopwatch.Restart();
 
-                    Task.Delay(2000).ContinueWith(_ =>
+                    while (isAwaitingResponse)
                     {
-                        if (isAwaitingResponse)
+                        if (stopwatch.ElapsedMilliseconds > 250)
                         {
-                            MessageBox.Show("Превышено время ожидания ответа от устройства.");
-                            isAwaitingResponse = false;
-                            return;
+                            Console.WriteLine("Response timed out.");
+                            break;
                         }
-                    });
-                    while (isAwaitingResponse) { continue; }
-
-                    bytesLeft -= count;
-                    offset += count;
-                    dma += 32;
+                    }
+                    if (responseReceived)
+                        break;
                 }
             });
+
         }
     }
     public class Sensor : FlowLayoutPanel

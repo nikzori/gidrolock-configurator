@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO.Ports;
+using System.Reflection;
+using System.Diagnostics;
 
 namespace Gidrolock_Modbus_Scanner
 {
@@ -20,6 +22,7 @@ namespace Gidrolock_Modbus_Scanner
         DateTime dateTime;
 
         Datasheet datasheet;
+        Stopwatch stopwatch = new Stopwatch();
         #region Initialization
         public App()
         {
@@ -77,8 +80,10 @@ namespace Gidrolock_Modbus_Scanner
         }
         #endregion
 
+
         private async void ButtonConnect_Click(object sender, EventArgs e)
         {
+
             if (cBoxPorts.SelectedItem.ToString() == "COM1")
             {
                 DialogResult res = MessageBox.Show("Выбран серийный порт COM1, который обычно является портом PS/2 или RS-232, не подключенным к Modbus устройству. Продолжить?", "Внимание", MessageBoxButtons.OKCancel);
@@ -123,17 +128,16 @@ namespace Gidrolock_Modbus_Scanner
                     latestMessage = null;
                     isAwaitingResponse = true;
                     var send = Modbus.ReadRegAsync((byte)upDownModbusID.Value, FunctionCode.ReadInput, 200, 6);
-                    await Task.Delay(2000).ContinueWith(_ =>
+                    stopwatch.Restart();
+                    while (isAwaitingResponse)
                     {
-                        if (isAwaitingResponse)
+                        if (stopwatch.ElapsedMilliseconds > 1000)
                         {
-                            isAwaitingResponse = false;
-                            MessageBox.Show("Истекло время ожидания ответа от устройства.");
+                            Console.WriteLine("Response timed out.");
+                            break;
                         }
-                        return;
-                    });
+                    }
 
-                    while (isAwaitingResponse) { continue; }
                     if (latestMessage is null)
                         return;
                     if (latestMessage.Status == ModbusStatus.Error)

@@ -60,6 +60,7 @@
             this.firmwarePathLabel = new System.Windows.Forms.Label();
             this.WriteFirmware = new System.Windows.Forms.Button();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.firmwareProgressBar = new System.Windows.Forms.ProgressBar();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudModbusID)).BeginInit();
             this.groupBox2.SuspendLayout();
@@ -371,6 +372,7 @@
             // 
             // groupBox3
             // 
+            this.groupBox3.Controls.Add(this.firmwareProgressBar);
             this.groupBox3.Controls.Add(this.BrowseFirmware);
             this.groupBox3.Controls.Add(this.WriteFirmware);
             this.groupBox3.Controls.Add(this.label11);
@@ -381,6 +383,13 @@
             this.groupBox3.TabIndex = 19;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Прошивка";
+            // 
+            // firmwareProgressBar
+            // 
+            this.firmwareProgressBar.Location = new System.Drawing.Point(176, 38);
+            this.firmwareProgressBar.Name = "firmwareProgressBar";
+            this.firmwareProgressBar.Size = new System.Drawing.Size(330, 23);
+            this.firmwareProgressBar.TabIndex = 19;
             // 
             // Datasheet
             // 
@@ -442,5 +451,6 @@
         private System.Windows.Forms.Label firmwarePathLabel;
         private System.Windows.Forms.Button WriteFirmware;
         private System.Windows.Forms.GroupBox groupBox3;
+        private System.Windows.Forms.ProgressBar firmwareProgressBar;
     }
 }
