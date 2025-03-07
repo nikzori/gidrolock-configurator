@@ -59,12 +59,6 @@ namespace Gidrolock_Modbus_Scanner
             System.Diagnostics.FileVersionInfo fvi = System.Diagnostics.FileVersionInfo.GetVersionInfo(assembly.Location);
             string version = fvi.FileVersion;
             Console.WriteLine("Version: " + version);
-
-            Modbus.ResponseReceived += (sndr, msg) =>
-            {
-                latestMessage = msg;
-                isAwaitingResponse = false;
-            };
         }
 
         void App_FormClosed(object sender, FormClosedEventArgs e)
@@ -129,17 +123,27 @@ namespace Gidrolock_Modbus_Scanner
                     isAwaitingResponse = true;
                     var send = Modbus.ReadRegAsync((byte)upDownModbusID.Value, FunctionCode.ReadInput, 200, 6);
                     stopwatch.Restart();
+                    int counter = 0;
                     while (isAwaitingResponse)
                     {
                         if (stopwatch.ElapsedMilliseconds > 1000)
                         {
-                            Console.WriteLine("Response timed out.");
-                            break;
+                            AddLog("Истекло время ожидания ответа от устройства. Повторный запрос...");
+                            isAwaitingResponse = false;
+                            counter++;
+                            if (counter > 3)
+                            {
+                                AddLog("Устройство не отвечает. Проверьте соединение с устройством.");
+                                return;
+                            }
                         }
                     }
 
                     if (latestMessage is null)
+                    {
+                        Console.WriteLine("Latest message is null;");
                         return;
+                    }
                     if (latestMessage.Status == ModbusStatus.Error)
                         return;
 
@@ -194,6 +198,7 @@ namespace Gidrolock_Modbus_Scanner
 
         void OnResponseReceived(object sender, ModbusResponseEventArgs e)
         {
+            latestMessage = e;
             isAwaitingResponse = false;
             AddLog("Получен ответ: " + Modbus.ByteArrayToString(e.Message));
             switch (e.Status)

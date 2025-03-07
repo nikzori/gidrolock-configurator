@@ -23,9 +23,10 @@ namespace Gidrolock_Modbus_Scanner
         SerialPort port = Modbus.port;
         bool isPolling = false;
         static bool isAwaitingResponse = false;
+        static bool responseReceived = false;
 
 
-        bool isValveClosed = false;
+    bool isValveClosed = false;
         bool alarmStatus = false;
         bool cleaningStatus = false;
 
@@ -80,7 +81,7 @@ namespace Gidrolock_Modbus_Scanner
                 labelBattery.Text = "Нет";
             else labelBattery.Text = "???%";
 
-            Modbus.ResponseReceived += (sndr, msg) => { isAwaitingResponse = false; latestMessage = msg; };
+            Modbus.ResponseReceived += (sndr, msg) => { responseReceived = true; latestMessage = msg; isAwaitingResponse = false; };
 
             for (int i = 0; i < device.wiredSensors; i++)
             {
@@ -246,7 +247,6 @@ namespace Gidrolock_Modbus_Scanner
             bool res = false;
             isAwaitingResponse = true;
             Modbus.ReadRegAsync(modbusID, (FunctionCode)entry.registerType, entry.address, entry.length);
-            
 
             stopwatch.Restart();
 
@@ -396,7 +396,7 @@ namespace Gidrolock_Modbus_Scanner
         {
             try
             {
-                fileThread.TrySetApartmentState(ApartmentState.STA);
+                fileThread.SetApartmentState(ApartmentState.STA);
                 fileThread.Start();
                 while (!fileThread.IsAlive) { Thread.Sleep(1); }
                 Thread.Sleep(1);
@@ -414,7 +414,8 @@ namespace Gidrolock_Modbus_Scanner
                 MessageBox.Show("Выберите файл прошивки.");
                 return;
             }
-            
+            int cntr = 0;
+
             FileStream fileStream = File.OpenRead(firmwarePath);
             long bytesLeft = fileStream.Length;
             long bytesTotal = fileStream.Length;
@@ -425,15 +426,13 @@ namespace Gidrolock_Modbus_Scanner
             byte[] flashAddr = new byte[2];
             byte[] CRC;
             List<byte> message;
-            bool responseReceived = false;
-            Modbus.ResponseReceived += (sndr, msg) => { responseReceived = true; };
             bool firstMessageSent = false;
             long bytesWritten = 0;
             await Task.Run(() =>
             {
                 while (bytesLeft > 0)
                 {
-                    if (firstMessageSent) // after first message the device is sent into recovery mode which only supports 9600 bps
+                    if (firstMessageSent && port.BaudRate != 9600) // after first message the device is sent into recovery mode which only supports 9600 bps
                     {
                         port.Close();
                         port.BaudRate = 9600;
@@ -477,50 +476,64 @@ namespace Gidrolock_Modbus_Scanner
                         message[message.Count - 2] = CRC[0];
                         message[message.Count - 1] = CRC[1];
 
-                        Console.WriteLine("Outgoing firmware message: " + Modbus.ByteArrayToString(message.ToArray()));
+                        responseReceived = false;
+
+
+                        while (true)
+                        {
+                            if (cntr > 3)
+                            {
+                                Console.WriteLine("Response timed out 4 times in a row, aborting. Check connection.");
+                                return;
+                            }
+                            isAwaitingResponse = true;
+                            Console.WriteLine("Outgoing firmware message: " + Modbus.ByteArrayToString(message.ToArray()));
+                            port.Write(message.ToArray(), 0, message.Count);
+                            stopwatch.Restart();
+
+                            while (isAwaitingResponse)
+                            {
+                                if (stopwatch.ElapsedMilliseconds > 1000)
+                                {
+                                    Console.WriteLine("Response timed out.");
+                                    cntr++;
+                                    break;
+                                }
+                            }
+
+                            if (responseReceived)
+                            {
+                                if (latestMessage.Status == ModbusStatus.Error)
+                                    Console.WriteLine("Response received: Error!");
+                                else
+                                {
+                                    Console.WriteLine("Response received: all good;");
+                                    break;
+                                }
+                            }
+                        }
+                        cntr = 0;
+                        bytesLeft -= count;
+                        bytesWritten += count;
+                        firmwareProgressBar.Invoke((MethodInvoker)delegate { firmwareProgressBar.Increment((int)(bytesWritten / bytesTotal) * 100); });
+
+                        _flashAddr += (short)count;
+                        if (port.BaudRate != 9600)
+                            firstMessageSent = true;
+
+                        if (bytesLeft <= 0)
+                            Console.WriteLine("Reached the end of firmware file.");
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show(ex.Message);
+                        MessageBox.Show(ex.Message, "Firmware writing error");
                         return;
                     }
 
-                    responseReceived = false;
-                    
-
-                    while (true)
-                    {
-                        
-                        isAwaitingResponse = true;
-                        port.Write(message.ToArray(), 0, message.Count);
-                        stopwatch.Restart();
-
-                        while (isAwaitingResponse) 
-                        {
-                            if (stopwatch.ElapsedMilliseconds > 1000)
-                            {
-                                Console.WriteLine("Response timed out.");
-                                break;
-                            }
-                        }
-                        
-                        if (responseReceived)
-                            break;
-                    }
-                    bytesLeft -= count;
-                    bytesWritten += count;
-                    firmwareProgressBar.Increment( (int)(bytesWritten / bytesTotal) * 100 );
-                    
-                    _flashAddr += (short)count;
-                    if (port.BaudRate != 9600)
-                        firstMessageSent = true;
-
-                    if (bytesLeft <= 0)
-                        Console.WriteLine("Reached the end of firmware file.");
                 }
 
                 /* Final Message */
-                message = new List<byte>(); 
+                message = new List<byte>();
                 message.Add(modbusID);  // device ID
                 message.Add(0x10);      // function code
                 message.Add(0xFF);      // register address
@@ -534,24 +547,32 @@ namespace Gidrolock_Modbus_Scanner
                 Modbus.GetCRC(message.ToArray(), ref CRC);
                 message[message.Count - 2] = CRC[0];
                 message[message.Count - 1] = CRC[1];
-                Console.WriteLine("Outgoing firmware message: " + Modbus.ByteArrayToString(message.ToArray()));
-
                 while (true)
                 {
                     isAwaitingResponse = true;
+                    Console.WriteLine("Outgoing firmware message: " + Modbus.ByteArrayToString(message.ToArray()));
                     port.Write(message.ToArray(), 0, message.Count);
                     stopwatch.Restart();
 
                     while (isAwaitingResponse)
                     {
-                        if (stopwatch.ElapsedMilliseconds > 250)
+                        if (stopwatch.ElapsedMilliseconds > 1000)
                         {
                             Console.WriteLine("Response timed out.");
                             break;
                         }
                     }
+
                     if (responseReceived)
-                        break;
+                    {
+                        if (latestMessage.Status == ModbusStatus.Error)
+                            Console.WriteLine("Response received: Error!");
+                        else
+                        {
+                            Console.WriteLine("Response received: all good;");
+                            break;
+                        }
+                    }
                 }
             });
 
