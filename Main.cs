@@ -362,7 +362,7 @@ namespace Gidrolock_Modbus_Scanner
                     d.cleaningMode = new Entry(RegisterType.Coil, 3);
 
                     d.hasBattery = true;
-                    d.batteryCharge = new Entry(RegisterType.Input, 1207);
+                    d.batteryCharge = new Entry(RegisterType.Input, 100);
 
                     d.wiredSensors = 7;
                     d.hasScenarioSensor = true;

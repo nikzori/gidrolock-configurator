@@ -586,7 +586,6 @@ namespace Gidrolock_Modbus_Scanner
     }
     public class WiredSensor : Sensor
     {
-
         public Label labelBreakFluff = new Label() { Width = 45, Height = 24 };
         public Label labelBreak = new Label() { Width = 55, Height = 24 }; // обрыв линии для WSP+
 
