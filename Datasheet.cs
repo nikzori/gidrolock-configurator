@@ -207,6 +207,7 @@ namespace Gidrolock_Modbus_Scanner
                     }
                 }
 
+                Console.WriteLine("Polling for radio status");
                 res = await PollEntry(device.radioStatus);
                 if (res)
                 {
@@ -242,6 +243,7 @@ namespace Gidrolock_Modbus_Scanner
             catch (Exception err) { MessageBox.Show(err.Message); }
         }
 
+        //Опрос всех записей
         async Task<bool> PollEntry(Entry entry)
         {
             bool res = false;
@@ -266,6 +268,7 @@ namespace Gidrolock_Modbus_Scanner
             return res;
         }
 
+        // Задать новый Slave ID для устройства
         private async void buttonSetID_Click(object sender, EventArgs e)
         {
             byte newID = (byte)nudModbusID.Value; // should prevent assigning wrong ID if UpDown is fiddled with in the middle of request 
@@ -286,6 +289,7 @@ namespace Gidrolock_Modbus_Scanner
                 modbusID = newID;
         }
 
+        // Кран
         private async void buttonValve_Click(object sender, EventArgs e)
         {
             ushort value = isValveClosed ? (ushort)0 : (ushort)0xFF00;
@@ -310,6 +314,7 @@ namespace Gidrolock_Modbus_Scanner
             }
         }
 
+        // Авария
         private async void buttonAlarm_Click(object sender, EventArgs e)
         {
             ushort value = alarmStatus ? (ushort)0 : (ushort)0xFF00;
@@ -334,6 +339,7 @@ namespace Gidrolock_Modbus_Scanner
             }
         }
 
+        // Режим уборки
         private async void buttonCleaning_Click(object sender, EventArgs e)
         {
             ushort value = cleaningStatus ? (ushort)0 : (ushort)0xFF00;
@@ -358,6 +364,7 @@ namespace Gidrolock_Modbus_Scanner
             }
         }
 
+        // Задать скорость передачи данных для устройства
         private async void buttonSetSpeed_Click(object sender, EventArgs e)
         {
             try
@@ -392,6 +399,7 @@ namespace Gidrolock_Modbus_Scanner
             catch (Exception ex) { MessageBox.Show(ex.Message); }
         }
 
+        // Выбор файла прошивки
         private void BrowseFirmware_Click(object sender, EventArgs e)
         {
             try
@@ -407,6 +415,7 @@ namespace Gidrolock_Modbus_Scanner
             firmwarePathLabel.Invoke(new MethodInvoker(delegate { firmwarePathLabel.Text = firmwarePath; }));
         }
 
+        // Запись прошивки
         private async void WriteFirmware_Click(object sender, EventArgs e)
         {
             if (firmwarePath is null || firmwarePath.Length == 0)

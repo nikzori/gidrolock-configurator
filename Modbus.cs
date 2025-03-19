@@ -270,25 +270,28 @@ namespace Gidrolock_Modbus_Scanner
         */
 
         static Stopwatch stopwatch = new Stopwatch();
+
         static byte[] buffer = new byte[255];
         static int offset = 0;
         static int count = 0;
         static void PortDataReceived(object sender, EventArgs e)
-        {          
+        {
+            
             try
             {
                 stopwatch.Restart();
-                while (stopwatch.ElapsedMilliseconds < 10)
+                while (stopwatch.ElapsedMilliseconds < 20)
                 {
                     if (port.BytesToRead > 0)
                     {
                         stopwatch.Restart();
-                        count = offset;
+                        count = port.BytesToRead;
                         port.Read(buffer, offset, port.BytesToRead);
                         offset += count;
                     }
                 }
                 // assume that the message ended
+                offset = 0;
                 List <byte> message = new List <byte>();
                 int endOfMessage = buffer.Length - 1;
                 for (int i = buffer.Length-1; i >= 0; i--)
@@ -337,8 +340,8 @@ namespace Gidrolock_Modbus_Scanner
             {
                 MessageBox.Show(err.Message, "Modbus message reception error");
             }
+
             port.DiscardInBuffer();
-            
         }
 
     }
