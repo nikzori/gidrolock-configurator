@@ -276,41 +276,38 @@ namespace Gidrolock_Modbus_Scanner
         static int count = 0;
         static void PortDataReceived(object sender, EventArgs e)
         {
-            
+            //reset values on every event call;
+            buffer = new byte[255];
+            offset = 0;
             try
             {
-                stopwatch.Restart();
-                while (stopwatch.ElapsedMilliseconds < 20)
-                {
-                    if (port.BytesToRead > 0)
-                    {
-                        stopwatch.Restart();
-                        count = port.BytesToRead;
-                        port.Read(buffer, offset, port.BytesToRead);
-                        offset += count;
-                    }
-                }
-                // assume that the message ended
+                //reset values on every event call;
+                buffer = new byte[255];
                 offset = 0;
-                List <byte> message = new List <byte>();
-                int endOfMessage = buffer.Length - 1;
-                for (int i = buffer.Length-1; i >= 0; i--)
+                try
                 {
-                    if (buffer[i] != 0x00)
+                    stopwatch.Restart();
+                    while (stopwatch.ElapsedMilliseconds < 20)
                     {
-                        endOfMessage = i;
-                        break;
+                        if (port.BytesToRead > 0)
+                        {
+                            stopwatch.Restart();
+                            count = port.BytesToRead;
+                            port.Read(buffer, offset, port.BytesToRead);
+                            offset += count;
+                        }
                     }
-                }
-                for (int i = 0; i < endOfMessage + 1; i++)
-                {
-                    message.Add(buffer[i]);
-                }
-                
-                if (message.Count == 0)
-                    return;
-                
-                Console.WriteLine("Incoming message: " + ByteArrayToString(message.ToArray(), false));
+                    // assume that the message ended
+
+                    List<byte> message = new List<byte>();
+                    for (int i = 0; i < offset; i++)
+                    {
+                        message.Add(buffer[i]);
+                    }
+                    if (message.Count == 0)
+                        return;
+
+                    Console.WriteLine("Incoming message: " + ByteArrayToString(message.ToArray(), false));
                 /*
                 if (!CheckResponse(message.ToArray()))
                 {
