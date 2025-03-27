@@ -6,7 +6,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{47A399D3-30C1-4EF4-9E94-F3518919A59C}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>Gidrolock_Modbus_Configurator</RootNamespace>
+    <RootNamespace>Gidrolock_Modbus_Scanner</RootNamespace>
     <AssemblyName>Gidrolock Modbus Configurator</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

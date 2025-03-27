@@ -14,7 +14,7 @@ namespace Gidrolock_Modbus_Scanner
     public static class Modbus
     {
         public static SerialPort port = new SerialPort();
-       
+
         public static event EventHandler<ModbusResponseEventArgs> ResponseReceived = delegate { };
 
         public static void Init()
@@ -276,38 +276,34 @@ namespace Gidrolock_Modbus_Scanner
         static int count = 0;
         static void PortDataReceived(object sender, EventArgs e)
         {
+
             //reset values on every event call;
             buffer = new byte[255];
             offset = 0;
             try
             {
-                //reset values on every event call;
-                buffer = new byte[255];
-                offset = 0;
-                try
+                stopwatch.Restart();
+                while (stopwatch.ElapsedMilliseconds < 20)
                 {
-                    stopwatch.Restart();
-                    while (stopwatch.ElapsedMilliseconds < 20)
+                    if (port.BytesToRead > 0)
                     {
-                        if (port.BytesToRead > 0)
-                        {
-                            stopwatch.Restart();
-                            count = port.BytesToRead;
-                            port.Read(buffer, offset, port.BytesToRead);
-                            offset += count;
-                        }
+                        stopwatch.Restart();
+                        count = port.BytesToRead;
+                        port.Read(buffer, offset, port.BytesToRead);
+                        offset += count;
                     }
-                    // assume that the message ended
+                }
+                // assume that the message ended
 
-                    List<byte> message = new List<byte>();
-                    for (int i = 0; i < offset; i++)
-                    {
-                        message.Add(buffer[i]);
-                    }
-                    if (message.Count == 0)
-                        return;
+                List<byte> message = new List<byte>();
+                for (int i = 0; i < offset; i++)
+                {
+                    message.Add(buffer[i]);
+                }
+                if (message.Count == 0)
+                    return;
 
-                    Console.WriteLine("Incoming message: " + ByteArrayToString(message.ToArray(), false));
+                Console.WriteLine("Incoming message: " + ByteArrayToString(message.ToArray(), false));
                 /*
                 if (!CheckResponse(message.ToArray()))
                 {
@@ -342,7 +338,6 @@ namespace Gidrolock_Modbus_Scanner
         }
 
     }
-
     public class ModbusResponseEventArgs : EventArgs
     {
         public byte[] Message { get; set; }
@@ -362,7 +357,7 @@ namespace Gidrolock_Modbus_Scanner
                 }
                 //Console.WriteLine("Read data: " + Modbus.ByteArrayToString(Data, false));
             }
-            else Data = new byte[1] {0x0F};
+            else Data = new byte[1] { 0x0F };
         }
     }
 
