@@ -26,7 +26,7 @@ namespace Gidrolock_Modbus_Scanner
         public Entry sensorAlarm;
 
         public List<Entry> wiredLineBreak;
-
+         
         public Entry radioStatus;
     }
 

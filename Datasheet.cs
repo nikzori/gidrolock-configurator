@@ -194,6 +194,20 @@ namespace Gidrolock_Modbus_Scanner
                     }
                 }
 
+                if (device.wiredLineBreak != null || device.wiredLineBreak.Count > 0)
+                {
+                    for (int i = 0; i < device.wiredLineBreak.Count; i++)
+                    {
+                        res = await PollEntry(device.wiredLineBreak[i]);
+                        if (res)
+                        {
+                            bool value = latestMessage.Data[0] > 0x00 ? true : false;
+                            WiredSensor snsr = sensorPanel.Controls[i] as WiredSensor;
+                            snsr.labelBreak.Text = value ? "Обрыв!" : "ОК";
+                        }
+                    }
+                }
+
                 res = await PollEntry(device.sensorAlarm);
                 if (res)
                 {

@@ -316,7 +316,11 @@ namespace Gidrolock_Modbus_Scanner
                     d.wiredSensors = 2;
                     d.hasScenarioSensor = true;
                     d.sensorAlarm = new Entry(RegisterType.Discrete, 1343, 24);
-
+                    d.wiredLineBreak = new List<Entry>()
+                    {
+                        new Entry(RegisterType.Discrete, 1205),
+                        new Entry(RegisterType.Discrete, 1207)
+                    };
                     d.radioStatus = new Entry(RegisterType.Input, 1215, 21);
 
                     break;
@@ -338,7 +342,11 @@ namespace Gidrolock_Modbus_Scanner
                     d.wiredSensors = 2;
                     d.hasScenarioSensor = false;
                     d.sensorAlarm = new Entry(RegisterType.Discrete, 1343, 23);
-
+                    d.wiredLineBreak = new List<Entry>()
+                    {
+                        new Entry(RegisterType.Discrete, 1205),
+                        new Entry(RegisterType.Discrete, 1207)
+                    };
                     d.radioStatus = new Entry(RegisterType.Input, 1215, 21);
 
                     break;
@@ -367,6 +375,16 @@ namespace Gidrolock_Modbus_Scanner
                     d.wiredSensors = 7;
                     d.hasScenarioSensor = true;
                     d.sensorAlarm = new Entry(RegisterType.Discrete, 1343, 29);
+                    d.wiredLineBreak = new List<Entry>()
+                    {
+                        new Entry(RegisterType.Discrete, 1025),
+                        new Entry(RegisterType.Discrete, 1026),
+                        new Entry(RegisterType.Discrete, 1027),
+                        new Entry(RegisterType.Discrete, 1028),
+                        new Entry(RegisterType.Discrete, 1029),
+                        new Entry(RegisterType.Discrete, 1030),
+                        new Entry(RegisterType.Discrete, 1031),
+                    };
                     d.radioStatus = new Entry(RegisterType.Input, 1215, 21);
                     break;
                 case DeviceType.Premium:

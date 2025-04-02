@@ -283,7 +283,7 @@ namespace Gidrolock_Modbus_Scanner
             try
             {
                 stopwatch.Restart();
-                while (stopwatch.ElapsedMilliseconds < 20)
+                while (stopwatch.ElapsedMilliseconds < 50)
                 {
                     if (port.BytesToRead > 0)
                     {
