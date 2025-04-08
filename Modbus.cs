@@ -274,59 +274,65 @@ namespace Gidrolock_Modbus_Scanner
         static byte[] buffer = new byte[255];
         static int offset = 0;
         static int count = 0;
+        static bool bytecountFound = false;
+        static int expectedBytes = 0;
         static void PortDataReceived(object sender, EventArgs e)
         {
-
             //reset values on every event call;
             buffer = new byte[255];
             offset = 0;
+            bytecountFound = false;
+            expectedBytes = 0;
+
+            Console.WriteLine("Port data received");
             try
             {
                 stopwatch.Restart();
-                while (stopwatch.ElapsedMilliseconds < 50)
+                while (stopwatch.ElapsedMilliseconds < port.ReadTimeout)
                 {
+                    if (bytecountFound && offset >= expectedBytes + 5)
+                        break;
                     if (port.BytesToRead > 0)
                     {
                         stopwatch.Restart();
                         count = port.BytesToRead;
-                        port.Read(buffer, offset, port.BytesToRead);
+                        port.Read(buffer, offset, count);
                         offset += count;
+                        if (!bytecountFound && offset >= 2)
+                        {
+                            expectedBytes = buffer[2];
+                            Console.WriteLine("Found data byte count: " + expectedBytes);
+                            bytecountFound = true;
+                        }
+                        if (bytecountFound && offset >= expectedBytes + 5) // reached end of message
+                        {
+                            Console.WriteLine("Reached end of message");
+                            break;
+                        }
+                        stopwatch.Restart();
                     }
                 }
+                // Console.WriteLine("Buffer: " + ByteArrayToString(buffer, false));
                 // assume that the message ended
+                Console.WriteLine("Message reception ended");
+                byte[] message = new byte[expectedBytes + 5];
+                for (int i = 0; i < expectedBytes + 5; i++)
+                    message[i] = buffer[i];
 
-                List<byte> message = new List<byte>();
-                for (int i = 0; i < offset; i++)
-                {
-                    message.Add(buffer[i]);
-                }
-                if (message.Count == 0)
-                    return;
-
-                Console.WriteLine("Incoming message: " + ByteArrayToString(message.ToArray(), false));
-                /*
-                if (!CheckResponse(message.ToArray()))
-                {
+                Console.WriteLine("Incoming message: " + ByteArrayToString(message, false));
+                
+                if (!CheckResponse(message))
                     Console.WriteLine("Bad CRC or not a modbus message!");
-                }
-                */
+
                 if (message[1] <= 0x04) // read functions
-                {
-                    //Console.WriteLine("It's a read message");
-                    ResponseReceived.Invoke(null, new ModbusResponseEventArgs(message.ToArray(), ModbusStatus.ReadSuccess));
-                }
+                    ResponseReceived.Invoke(null, new ModbusResponseEventArgs(message, ModbusStatus.ReadSuccess));
+
                 else
                 {
                     if (message[1] <= 0x10) // write functions
-                    {
-                        //Console.WriteLine("It's a write message");
-                        ResponseReceived.Invoke(null, new ModbusResponseEventArgs(message.ToArray(), ModbusStatus.WriteSuccess));
-                    }
+                        ResponseReceived.Invoke(null, new ModbusResponseEventArgs(message, ModbusStatus.WriteSuccess));
                     else // error codes
-                    {
-                        //Console.WriteLine("It's an error");
-                        ResponseReceived.Invoke(null, new ModbusResponseEventArgs(message.ToArray(), ModbusStatus.Error));
-                    }
+                        ResponseReceived.Invoke(null, new ModbusResponseEventArgs(message, ModbusStatus.Error));
                 }
             }
             catch (Exception err)

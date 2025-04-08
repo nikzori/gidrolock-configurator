@@ -129,11 +129,12 @@ namespace Gidrolock_Modbus_Scanner
                         if (stopwatch.ElapsedMilliseconds > 1000)
                         {
                             AddLog("Истекло время ожидания ответа от устройства. Повторный запрос...");
-                            isAwaitingResponse = false;
+                            stopwatch.Restart();
                             counter++;
                             if (counter > 3)
                             {
                                 AddLog("Устройство не отвечает. Проверьте соединение с устройством.");
+                                isAwaitingResponse = false;
                                 return;
                             }
                         }

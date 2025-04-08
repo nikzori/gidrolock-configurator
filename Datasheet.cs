@@ -26,7 +26,7 @@ namespace Gidrolock_Modbus_Scanner
         static bool responseReceived = false;
 
 
-    bool isValveClosed = false;
+        bool isValveClosed = false;
         bool alarmStatus = false;
         bool cleaningStatus = false;
 
@@ -257,18 +257,18 @@ namespace Gidrolock_Modbus_Scanner
             catch (Exception err) { MessageBox.Show(err.Message); }
         }
 
-        //Опрос всех записей
         async Task<bool> PollEntry(Entry entry)
         {
+            latestMessage = null;
             bool res = false;
             isAwaitingResponse = true;
-            Modbus.ReadRegAsync(modbusID, (FunctionCode)entry.registerType, entry.address, entry.length);
 
+            Modbus.ReadRegAsync(modbusID, (FunctionCode)entry.registerType, entry.address, entry.length);
             stopwatch.Restart();
 
-            while (isAwaitingResponse)
+            while (isAwaitingResponse && latestMessage == null)
             {
-                if (stopwatch.ElapsedMilliseconds > 1000)
+                if (stopwatch.ElapsedMilliseconds > 5000)
                 {
                     Console.WriteLine("Response timed out.");
                     break;
@@ -287,12 +287,13 @@ namespace Gidrolock_Modbus_Scanner
         {
             byte newID = (byte)nudModbusID.Value; // should prevent assigning wrong ID if UpDown is fiddled with in the middle of request 
             isAwaitingResponse = true;
+            latestMessage = null;
             Modbus.WriteSingleAsync(FunctionCode.WriteRegister, modbusID, 128, newID);
 
             stopwatch.Restart();
             while (isAwaitingResponse)
             {
-                if (stopwatch.ElapsedMilliseconds > 1000)
+                if (stopwatch.ElapsedMilliseconds > port.ReadTimeout)
                 {
                     Console.WriteLine("Response timed out.");
                     break;
@@ -308,12 +309,13 @@ namespace Gidrolock_Modbus_Scanner
         {
             ushort value = isValveClosed ? (ushort)0 : (ushort)0xFF00;
             isAwaitingResponse = true;
+            latestMessage = null;
             Modbus.WriteSingleAsync(FunctionCode.WriteCoil, modbusID, device.valveStatus.address, value);
 
             stopwatch.Restart();
             while (isAwaitingResponse)
             {
-                if (stopwatch.ElapsedMilliseconds > 1000)
+                if (stopwatch.ElapsedMilliseconds > port.ReadTimeout)
                 {
                     Console.WriteLine("Response timed out.");
                     break;
@@ -333,12 +335,13 @@ namespace Gidrolock_Modbus_Scanner
         {
             ushort value = alarmStatus ? (ushort)0 : (ushort)0xFF00;
             isAwaitingResponse = true;
+            latestMessage = null;
             Modbus.WriteSingleAsync(FunctionCode.WriteCoil, modbusID, device.alarmStatus.address, value);
 
             stopwatch.Restart();
             while (isAwaitingResponse)
             {
-                if (stopwatch.ElapsedMilliseconds > 1000)
+                if (stopwatch.ElapsedMilliseconds > port.ReadTimeout)
                 {
                     Console.WriteLine("Response timed out.");
                     break;
@@ -358,6 +361,7 @@ namespace Gidrolock_Modbus_Scanner
         {
             ushort value = cleaningStatus ? (ushort)0 : (ushort)0xFF00;
             isAwaitingResponse = true;
+            latestMessage = null;
             Modbus.WriteSingleAsync(FunctionCode.WriteCoil, modbusID, device.cleaningMode.address, value);
 
             stopwatch.Restart();
@@ -391,12 +395,14 @@ namespace Gidrolock_Modbus_Scanner
                 // send speed value to device
                 // await for response
                 isAwaitingResponse = true;
+                latestMessage = null;
                 Modbus.WriteSingleAsync(FunctionCode.WriteRegister, modbusID, device.baudRate.address, newSpeed);
 
                 stopwatch.Restart();
+
                 while (isAwaitingResponse)
                 {
-                    if (stopwatch.ElapsedMilliseconds > 1000)
+                    if (stopwatch.ElapsedMilliseconds > port.ReadTimeout)
                     {
                         Console.WriteLine("Response timed out.");
                         break;
@@ -510,13 +516,14 @@ namespace Gidrolock_Modbus_Scanner
                                 return;
                             }
                             isAwaitingResponse = true;
+                            latestMessage = null;
                             Console.WriteLine("Outgoing firmware message: " + Modbus.ByteArrayToString(message.ToArray()));
                             port.Write(message.ToArray(), 0, message.Count);
                             stopwatch.Restart();
 
                             while (isAwaitingResponse)
                             {
-                                if (stopwatch.ElapsedMilliseconds > 1000)
+                                if (stopwatch.ElapsedMilliseconds > port.ReadTimeout)
                                 {
                                     Console.WriteLine("Response timed out.");
                                     cntr++;
