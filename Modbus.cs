@@ -257,23 +257,14 @@ namespace Gidrolock_Modbus_Scanner
                 return false;
         }
         #endregion
-        /*
-        static byte[] buffer = new byte[255];
-        static int offset = 0;
-        static Thread timer = new Thread(new ThreadStart(() =>
-        {
-            Thread.Sleep(50);
-            offset = 0;
-            buffer = new byte[255];
-            port.DiscardInBuffer();
-        }));
-        */
+
 
         static Stopwatch stopwatch = new Stopwatch();
 
         static byte[] buffer = new byte[255];
         static int offset = 0;
         static int count = 0;
+        static ModbusStatus responseStatus;
         static bool bytecountFound = false;
         static int expectedBytes = 0;
         static void PortDataReceived(object sender, EventArgs e)
@@ -284,13 +275,12 @@ namespace Gidrolock_Modbus_Scanner
             bytecountFound = false;
             expectedBytes = 0;
 
-            Console.WriteLine("Port data received");
             try
             {
                 stopwatch.Restart();
                 while (stopwatch.ElapsedMilliseconds < port.ReadTimeout)
                 {
-                    if (bytecountFound && offset >= expectedBytes + 5)
+                    if (bytecountFound && offset >= expectedBytes)
                         break;
                     if (port.BytesToRead > 0)
                     {
@@ -298,13 +288,31 @@ namespace Gidrolock_Modbus_Scanner
                         count = port.BytesToRead;
                         port.Read(buffer, offset, count);
                         offset += count;
-                        if (!bytecountFound && offset >= 2)
+                        if (offset >= 1)
                         {
-                            expectedBytes = buffer[2];
+                            if (buffer[1] < 0x05)
+                                responseStatus = ModbusStatus.ReadSuccess;
+                            else if (buffer[1] < 0x10)
+                            {
+                                responseStatus = ModbusStatus.WriteSuccess;
+                                expectedBytes = 8;
+                                bytecountFound = true;
+                            }
+                            else
+                            {
+                                responseStatus = ModbusStatus.Error;
+                                expectedBytes = 5;
+                                bytecountFound = true;
+                            }
+                        }
+
+                        if (responseStatus == ModbusStatus.ReadSuccess && !bytecountFound && offset >= 2)
+                        {
+                            expectedBytes = buffer[2] + 5;
                             Console.WriteLine("Found data byte count: " + expectedBytes);
                             bytecountFound = true;
                         }
-                        if (bytecountFound && offset >= expectedBytes + 5) // reached end of message
+                        if (bytecountFound && offset >= expectedBytes) // reached end of message
                         {
                             Console.WriteLine("Reached end of message");
                             break;
@@ -315,25 +323,18 @@ namespace Gidrolock_Modbus_Scanner
                 // Console.WriteLine("Buffer: " + ByteArrayToString(buffer, false));
                 // assume that the message ended
                 Console.WriteLine("Message reception ended");
-                byte[] message = new byte[expectedBytes + 5];
-                for (int i = 0; i < expectedBytes + 5; i++)
+                byte[] message = new byte[expectedBytes];
+                for (int i = 0; i < expectedBytes; i++)
                     message[i] = buffer[i];
 
                 Console.WriteLine("Incoming message: " + ByteArrayToString(message, false));
-                
+
                 if (!CheckResponse(message))
                     Console.WriteLine("Bad CRC or not a modbus message!");
 
-                if (message[1] <= 0x04) // read functions
-                    ResponseReceived.Invoke(null, new ModbusResponseEventArgs(message, ModbusStatus.ReadSuccess));
+                ResponseReceived.Invoke(null, new ModbusResponseEventArgs(message, responseStatus));
 
-                else
-                {
-                    if (message[1] <= 0x10) // write functions
-                        ResponseReceived.Invoke(null, new ModbusResponseEventArgs(message, ModbusStatus.WriteSuccess));
-                    else // error codes
-                        ResponseReceived.Invoke(null, new ModbusResponseEventArgs(message, ModbusStatus.Error));
-                }
+
             }
             catch (Exception err)
             {

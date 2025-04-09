@@ -18,7 +18,7 @@ namespace Gidrolock_Modbus_Scanner
         byte modbusID;
         Device device;
 
-        ModbusResponseEventArgs latestMessage;
+        public static ModbusResponseEventArgs latestMessage;
 
         SerialPort port = Modbus.port;
         bool isPolling = false;
@@ -34,9 +34,7 @@ namespace Gidrolock_Modbus_Scanner
         List<WirelessSensor> wirelessSensors;
         public static string firmwarePath;
 
-        static int timeout = 1000;
         Stopwatch stopwatch = new Stopwatch();
-
         Thread fileThread = new Thread((ThreadStart)delegate
         {
             OpenFileDialog ofd = new OpenFileDialog();
@@ -117,151 +115,158 @@ namespace Gidrolock_Modbus_Scanner
 
         private async void buttonPoll_Click(object sender, EventArgs e)
         {
+            if (isPolling)
+                return;
             // hardcoded for now, probably easier to keep it like this in the future
             try
             {
-                bool res = await PollEntry(device.firmware);
-                Console.WriteLine("Polling for alarm status, poll success: " + res);
-                if (res)
+                await Task.Run(() =>
                 {
-                    labelFirmware.Text = App.ByteArrayToUnicode(latestMessage.Data);
-                }
 
-                if (device.hasBattery)
-                {
-                    res = await PollEntry(device.batteryCharge);
+                    bool res = PollEntry(device.firmware);
+                    Console.WriteLine("Polling for alarm status, poll success: " + res);
                     if (res)
                     {
-                        labelBattery.Text = latestMessage.Data.Last().ToString();
+                        this.Invoke(new MethodInvoker(delegate { labelFirmware.Text = App.ByteArrayToUnicode(latestMessage.Data); }));
                     }
-                }
 
-                res = await PollEntry(device.valveStatus);
-                Console.WriteLine("Polling for valve status, poll success: " + res);
-                if (res)
-                {
-                    if (latestMessage.Data.Last() > 0)
+                    if (device.hasBattery)
                     {
-                        isValveClosed = true;
-                        labelValve.Text = "Закрыт";
-                        buttonValve.Text = "Открыть";
+                        res = PollEntry(device.batteryCharge);
+                        if (res)
+                        {
+                            this.Invoke(new MethodInvoker(delegate { labelBattery.Text = latestMessage.Data.Last().ToString(); }));
+                        }
                     }
-                    else
-                    {
-                        isValveClosed = false;
-                        labelValve.Text = "Открыт";
-                        buttonValve.Text = "Закрыть";
-                    }
-                }
 
-                res = await PollEntry(device.alarmStatus);
-                Console.WriteLine("Polling for alarm status, poll success: " + res);
-                if (res)
-                {
-                    Console.WriteLine("Alarm data: " + Modbus.ByteArrayToString(latestMessage.Data));
-                    Console.WriteLine("Alarm data.last: " + latestMessage.Data.Last().ToString());
-                    if (latestMessage.Data.Last() > 0)
-                    {
-                        alarmStatus = true;
-                        buttonAlarm.Text = "Выключить";
-                        labelAlarm.Text = "Протечка!";
-                    }
-                    else
-                    {
-                        alarmStatus = false;
-                        buttonAlarm.Text = "Авария";
-                        labelAlarm.Text = "нет";
-                    }
-                }
-
-                if (device.hasCleaningMode)
-                {
-                    res = await PollEntry(device.cleaningMode);
+                    res = PollEntry(device.valveStatus);
+                    Console.WriteLine("Polling for valve status, poll success: " + res);
                     if (res)
                     {
                         if (latestMessage.Data.Last() > 0)
                         {
-                            cleaningStatus = true;
-                            buttonCleaning.Text = "Выключить";
-                            labelCleaning.Text = "вкл";
+                            isValveClosed = true;
+                            this.Invoke(new MethodInvoker(delegate { labelValve.Text = "Закрыт"; }));
+                            this.Invoke(new MethodInvoker(delegate { buttonValve.Text = "Открыть"; }));
                         }
                         else
                         {
-                            cleaningStatus = false;
-                            buttonCleaning.Text = "Включить";
-                            labelCleaning.Text = "выкл";
+                            isValveClosed = false;
+                            this.Invoke(new MethodInvoker(delegate { labelValve.Text = "Открыт"; }));
+                            this.Invoke(new MethodInvoker(delegate { buttonValve.Text = "Закрыть"; }));
                         }
                     }
-                }
 
-                if (device.wiredLineBreak != null || device.wiredLineBreak.Count > 0)
-                {
-                    for (int i = 0; i < device.wiredLineBreak.Count; i++)
+                    res = PollEntry(device.alarmStatus);
+                    Console.WriteLine("Polling for alarm status, poll success: " + res);
+                    if (res)
                     {
-                        res = await PollEntry(device.wiredLineBreak[i]);
+                        Console.WriteLine("Alarm data: " + Modbus.ByteArrayToString(latestMessage.Data));
+                        Console.WriteLine("Alarm data.last: " + latestMessage.Data.Last().ToString());
+                        if (latestMessage.Data.Last() > 0)
+                        {
+                            alarmStatus = true;
+                            this.Invoke(new MethodInvoker(delegate { buttonAlarm.Text = "Выключить"; }));
+                            this.Invoke(new MethodInvoker(delegate { labelAlarm.Text = "Протечка!"; }));
+                        }
+                        else
+                        {
+                            alarmStatus = false;
+                            this.Invoke(new MethodInvoker(delegate { buttonAlarm.Text = "Авария"; }));
+                            this.Invoke(new MethodInvoker(delegate { labelAlarm.Text = "нет"; }));
+                        }
+                    }
+
+                    if (device.hasCleaningMode)
+                    {
+                        res = PollEntry(device.cleaningMode);
                         if (res)
                         {
-                            bool value = latestMessage.Data[0] > 0x00 ? true : false;
-                            WiredSensor snsr = sensorPanel.Controls[i] as WiredSensor;
-                            snsr.labelBreak.Text = value ? "Обрыв!" : "ОК";
+                            if (latestMessage.Data.Last() > 0)
+                            {
+                                cleaningStatus = true;
+                                this.Invoke(new MethodInvoker(delegate { buttonCleaning.Text = "Выключить"; }));
+                                this.Invoke(new MethodInvoker(delegate { labelCleaning.Text = "вкл"; }));
+                            }
+                            else
+                            {
+                                cleaningStatus = false;
+                                this.Invoke(new MethodInvoker(delegate { buttonCleaning.Text = "Включить"; }));
+                                this.Invoke(new MethodInvoker(delegate { labelCleaning.Text = "выкл"; }));
+                            }
                         }
                     }
-                }
 
-                res = await PollEntry(device.sensorAlarm);
-                if (res)
-                {
-                    BitArray bArray = new BitArray(latestMessage.Data);
-                    bool[] bools = new bool[bArray.Length];
-                    bArray.CopyTo(bools, 0);
-                    for (int i = 0; i < sensorPanel.Controls.Count; i++)
+                    if (device.wiredLineBreak != null || device.wiredLineBreak.Count > 0)
                     {
-                        Sensor snsr = sensorPanel.Controls[i] as Sensor;
-                        snsr.labelLeak.Text = bools[i] ? "Протечка!" : "нет";
-                    }
-                }
-
-                Console.WriteLine("Polling for radio status");
-                res = await PollEntry(device.radioStatus);
-                if (res)
-                {
-                    List<byte> values = new List<byte>(latestMessage.Data.Length / 2);
-                    for (int i = 1; i < latestMessage.Data.Length; i += 2)
-                        values.Add(latestMessage.Data[i]);
-                    int add = device.wiredSensors + (device.hasScenarioSensor ? 1 : 0);
-                    for (int i = 0; i < sensorPanel.Controls.Count - add; i++)
-                    {
-
-                        WirelessSensor snsr = sensorPanel.Controls[i + add] as WirelessSensor;
-                        string txt = "нет";
-                        switch (values[i])
+                        for (int i = 0; i < device.wiredLineBreak.Count; i++)
                         {
-                            case 1:
-                                txt = "норма";
-                                break;
-                            case 2:
-                                txt = "протечка";
-                                break;
-                            case 3:
-                                txt = "разряжен";
-                                break;
-                            case 4:
-                                txt = "потеря";
-                                break;
-                        }
-                        snsr.labelStatus.Text = txt;
-                    }
-                }
+                            res = PollEntry(device.wiredLineBreak[i]);
+                            if (res)
+                            {
+                                bool value = latestMessage.Data[0] > 0x00 ? true : false;
+                                WiredSensor snsr = sensorPanel.Controls[i] as WiredSensor;
+                                snsr.Invoke(new MethodInvoker(delegate { snsr.labelBreak.Text = value ? "Обрыв!" : "ОК"; }));
 
+                            }
+                        }
+                    }
+
+                    res = PollEntry(device.sensorAlarm);
+                    if (res)
+                    {
+                        BitArray bArray = new BitArray(latestMessage.Data);
+                        bool[] bools = new bool[bArray.Length];
+                        bArray.CopyTo(bools, 0);
+                        for (int i = 0; i < sensorPanel.Controls.Count; i++)
+                        {
+                            Sensor snsr = sensorPanel.Controls[i] as Sensor;
+                            snsr.Invoke(new MethodInvoker(delegate { snsr.labelLeak.Text = bools[i] ? "Протечка!" : "нет"; }));
+                        }
+                    }
+
+                    Console.WriteLine("Polling for radio status");
+                    res = PollEntry(device.radioStatus);
+                    if (res)
+                    {
+                        List<byte> values = new List<byte>(latestMessage.Data.Length / 2);
+                        for (int i = 1; i < latestMessage.Data.Length; i += 2)
+                            values.Add(latestMessage.Data[i]);
+                        int add = device.wiredSensors + (device.hasScenarioSensor ? 1 : 0);
+                        for (int i = 0; i < sensorPanel.Controls.Count - add; i++)
+                        {
+
+                            WirelessSensor snsr = sensorPanel.Controls[i + add] as WirelessSensor;
+                            string txt = "нет";
+                            switch (values[i])
+                            {
+                                case 1:
+                                    txt = "норма";
+                                    break;
+                                case 2:
+                                    txt = "протечка";
+                                    break;
+                                case 3:
+                                    txt = "разряжен";
+                                    break;
+                                case 4:
+                                    txt = "потеря";
+                                    break;
+                            }
+                            snsr.Invoke(new MethodInvoker(delegate { snsr.labelStatus.Text = txt; }));
+                        }
+                    }
+                });
             }
             catch (Exception err) { MessageBox.Show(err.Message); }
         }
 
-        async Task<bool> PollEntry(Entry entry)
+        bool PollEntry(Entry entry)
         {
             latestMessage = null;
             bool res = false;
             isAwaitingResponse = true;
+            isPolling = true;
 
             Modbus.ReadRegAsync(modbusID, (FunctionCode)entry.registerType, entry.address, entry.length);
             stopwatch.Restart();
@@ -279,6 +284,34 @@ namespace Gidrolock_Modbus_Scanner
                 res = true;
 
             Console.WriteLine("Poll attempt finished");
+            isPolling = false;
+            return res;
+        }
+        bool SetEntry(Entry entry, ushort value)
+        {
+            latestMessage = null;
+            bool res = false;
+            isAwaitingResponse = true;
+            isPolling = true;
+            FunctionCode fc = FunctionCode.WriteCoil;
+            if (entry.registerType == RegisterType.Holding)
+                fc = FunctionCode.WriteRegister;
+
+            Modbus.WriteSingleAsync(fc, modbusID, entry.address, value);
+            stopwatch.Restart();
+
+            while (isAwaitingResponse && latestMessage == null)
+            {
+                if (stopwatch.ElapsedMilliseconds > port.ReadTimeout)
+                {
+                    Console.WriteLine("Response timed out.");
+                    break;
+                }   
+            }
+
+            if (latestMessage != null && latestMessage.Status == ModbusStatus.WriteSuccess)
+                res = true;
+            isPolling = false;
             return res;
         }
 
@@ -293,7 +326,7 @@ namespace Gidrolock_Modbus_Scanner
             stopwatch.Restart();
             while (isAwaitingResponse)
             {
-                if (stopwatch.ElapsedMilliseconds > port.ReadTimeout)
+                if (stopwatch.ElapsedMilliseconds > 10000)
                 {
                     Console.WriteLine("Response timed out.");
                     break;
@@ -307,48 +340,30 @@ namespace Gidrolock_Modbus_Scanner
         // Кран
         private async void buttonValve_Click(object sender, EventArgs e)
         {
-            ushort value = isValveClosed ? (ushort)0 : (ushort)0xFF00;
-            isAwaitingResponse = true;
-            latestMessage = null;
-            Modbus.WriteSingleAsync(FunctionCode.WriteCoil, modbusID, device.valveStatus.address, value);
-
-            stopwatch.Restart();
-            while (isAwaitingResponse)
+            try
             {
-                if (stopwatch.ElapsedMilliseconds > port.ReadTimeout)
+                await Task.Run(() =>
                 {
-                    Console.WriteLine("Response timed out.");
-                    break;
-                }
+                    ushort value = isValveClosed ? (ushort)0 : (ushort)0xFF00;
+                    if (SetEntry(device.valveStatus, value))
+                    {
+                        isValveClosed = !isValveClosed;
+                        labelValve.Invoke(new MethodInvoker(delegate { labelValve.Text = isValveClosed ? "Закрыт" : "Открыт"; }));
+                        buttonValve.Invoke(new MethodInvoker(delegate { buttonValve.Text = isValveClosed ? "Открыть" : "Закрыть"; }));
+                    }
+                });
             }
-
-            if (latestMessage != null && latestMessage.Status != ModbusStatus.Error)
+            catch (Exception err)
             {
-                isValveClosed = !isValveClosed;
-                labelValve.Text = isValveClosed ? "Закрыт" : "Открыт";
-                buttonValve.Text = isValveClosed ? "Открыть" : "Закрыть";
+                MessageBox.Show(err.Message, "Valve Set Error");
             }
         }
 
         // Авария
-        private async void buttonAlarm_Click(object sender, EventArgs e)
+        private void buttonAlarm_Click(object sender, EventArgs e)
         {
             ushort value = alarmStatus ? (ushort)0 : (ushort)0xFF00;
-            isAwaitingResponse = true;
-            latestMessage = null;
-            Modbus.WriteSingleAsync(FunctionCode.WriteCoil, modbusID, device.alarmStatus.address, value);
-
-            stopwatch.Restart();
-            while (isAwaitingResponse)
-            {
-                if (stopwatch.ElapsedMilliseconds > port.ReadTimeout)
-                {
-                    Console.WriteLine("Response timed out.");
-                    break;
-                }
-            }
-
-            if (latestMessage != null && latestMessage.Status != ModbusStatus.Error)
+            if (SetEntry(device.alarmStatus, value))
             {
                 alarmStatus = !alarmStatus;
                 labelAlarm.Text = alarmStatus ? "Протечка!" : "Нет";
@@ -357,24 +372,10 @@ namespace Gidrolock_Modbus_Scanner
         }
 
         // Режим уборки
-        private async void buttonCleaning_Click(object sender, EventArgs e)
+        private void buttonCleaning_Click(object sender, EventArgs e)
         {
             ushort value = cleaningStatus ? (ushort)0 : (ushort)0xFF00;
-            isAwaitingResponse = true;
-            latestMessage = null;
-            Modbus.WriteSingleAsync(FunctionCode.WriteCoil, modbusID, device.cleaningMode.address, value);
-
-            stopwatch.Restart();
-            while (isAwaitingResponse)
-            {
-                if (stopwatch.ElapsedMilliseconds > 1000)
-                {
-                    Console.WriteLine("Response timed out.");
-                    break;
-                }
-            }
-
-            if (latestMessage != null && latestMessage.Status != ModbusStatus.Error)
+            if (SetEntry(device.cleaningMode, value))
             {
                 cleaningStatus = !cleaningStatus;
                 labelCleaning.Text = cleaningStatus ? "вкл" : "выкл";
@@ -383,37 +384,19 @@ namespace Gidrolock_Modbus_Scanner
         }
 
         // Задать скорость передачи данных для устройства
-        private async void buttonSetSpeed_Click(object sender, EventArgs e)
+        private void buttonSetSpeed_Click(object sender, EventArgs e)
         {
             try
             {
                 string str = cBoxSpeed.Items[cBoxSpeed.SelectedIndex].ToString();
                 str = str.Substring(0, str.Length - 2); //clip off two zeroes at the end
                 ushort newSpeed = (ushort)Int16.Parse(str);
-                //Console.WriteLine("Baudrate: " + newSpeed);
-
-                // send speed value to device
-                // await for response
-                isAwaitingResponse = true;
-                latestMessage = null;
-                Modbus.WriteSingleAsync(FunctionCode.WriteRegister, modbusID, device.baudRate.address, newSpeed);
-
-                stopwatch.Restart();
-
-                while (isAwaitingResponse)
+                Console.WriteLine("new speed: " + newSpeed);
+                if (SetEntry(device.baudRate, newSpeed))
                 {
-                    if (stopwatch.ElapsedMilliseconds > port.ReadTimeout)
-                    {
-                        Console.WriteLine("Response timed out.");
-                        break;
-                    }
-                }
-
-                if (latestMessage != null && latestMessage.Status != ModbusStatus.Error)
-                {
-                    port.Close();
-                    port.BaudRate = newSpeed;
-                    port.Open();
+                    //port.Close();
+                    port.BaudRate = newSpeed * 100;
+                    //port.Open();
                 }
             }
             catch (Exception ex) { MessageBox.Show(ex.Message); }
