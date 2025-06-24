@@ -376,6 +376,16 @@ namespace Gidrolock_Modbus_Scanner
                     d.wiredSensors = 7;
                     d.hasScenarioSensor = true;
                     d.sensorAlarm = new Entry(RegisterType.Discrete, 1343, 29);
+                    d.wspPlusMode = new List<Entry>()
+                    {
+                        new Entry(RegisterType.Coil, 1041),
+                        new Entry(RegisterType.Coil, 1042),
+                        new Entry(RegisterType.Coil, 1043),
+                        new Entry(RegisterType.Coil, 1044),
+                        new Entry(RegisterType.Coil, 1045),
+                        new Entry(RegisterType.Coil, 1046),
+                        new Entry(RegisterType.Coil, 1047),
+                    };
                     d.wiredLineBreak = new List<Entry>()
                     {
                         new Entry(RegisterType.Discrete, 1025),

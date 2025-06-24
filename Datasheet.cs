@@ -83,10 +83,23 @@ namespace Gidrolock_Modbus_Scanner
 
             for (int i = 0; i < device.wiredSensors; i++)
             {
-                WiredSensor ws = new WiredSensor(i) { Width = 495, Height = 24 };
+                WiredSensor ws = new WiredSensor(i,device) { Width = 495, Height = 24 };
                 sensorPanel.Controls.Add(ws);
                 ws.Visible = true;
 
+                if (device.modelName == "PRPLS1")
+                {
+                    ws.wspPlusEntry = device.wspPlusMode[i];
+                    ws.wspPlusCheckbox.CheckedChanged += (s, e) =>
+                    {
+                        try
+                        {
+                            ushort value = ws.wspPlusCheckbox.Checked ? (ushort)0xFF00 : (ushort)0x0000;
+                            SetEntry(ws.wspPlusEntry, value);
+                        }
+                        catch (Exception err) { MessageBox.Show(err.Message, "WSP+ toggle error"); }                        
+                    };
+                }
             }
             if (device.hasScenarioSensor)
             {
@@ -193,6 +206,20 @@ namespace Gidrolock_Modbus_Scanner
                                 cleaningStatus = false;
                                 this.Invoke(new MethodInvoker(delegate { buttonCleaning.Text = "Включить"; }));
                                 this.Invoke(new MethodInvoker(delegate { labelCleaning.Text = "выкл"; }));
+                            }
+                        }
+                    }
+
+                    if (device.wspPlusMode != null || device.wspPlusMode.Count > 0)
+                    {
+                        for(int i = 0; i < device.wspPlusMode.Count; i++)
+                        {
+                            res = PollEntry(device.wspPlusMode[i]);
+                            if (res)
+                            {
+                                bool value = latestMessage.Data[0] > 0x00 ? true : false;
+                                WiredSensor snsr = sensorPanel.Controls[i] as WiredSensor;
+                                snsr.Invoke(new MethodInvoker(delegate { snsr.wspPlusCheckbox.Checked = value; }));
                             }
                         }
                     }
@@ -591,6 +618,8 @@ namespace Gidrolock_Modbus_Scanner
 
         }
     }
+
+#region Sensor Classes
     public class Sensor : FlowLayoutPanel
     {
         public Label labelName = new Label() { Width = 60, Height = 24 };
@@ -602,9 +631,10 @@ namespace Gidrolock_Modbus_Scanner
         public Label labelBreakFluff = new Label() { Width = 45, Height = 24 };
         public Label labelBreak = new Label() { Width = 55, Height = 24 }; // обрыв линии для WSP+
 
-        //public Label labelWSPPlusFluff = new Label() { Width = 45, Height = 24 };
-        //public CheckBox wspPlusCheckbox = new CheckBox() { Width = 20, Height = 14 };
-        public WiredSensor(int count)
+        public Label labelWSPPlusFluff;
+        public CheckBox wspPlusCheckbox;
+        public Entry wspPlusEntry; // for WSP+ control
+        public WiredSensor(int count, Device device)
         {
             this.Margin = Padding.Empty;
             this.Padding = new Padding(0, 5, 0, 0);
@@ -620,9 +650,6 @@ namespace Gidrolock_Modbus_Scanner
             this.Controls.Add(labelLeakFluff);
             this.Controls.Add(labelLeak);
 
-            //this.Controls.Add(labelWSPPlusFluff);
-            //this.Controls.Add(wspPlusCheckbox);
-
             labelName.Text = "WSP " + (count + 1);
 
             labelLeakFluff.Text = "Протечка:";
@@ -630,9 +657,15 @@ namespace Gidrolock_Modbus_Scanner
 
             labelBreakFluff.Text = "Обрыв:";
             labelBreak.Text = "неизвестно";
+            if (device.wspPlusMode != null || device.wspPlusMode.Count > 0)
+            {
+                labelWSPPlusFluff = new Label() { Width = 45, Height = 24, Text = "WSP+:" };
+                wspPlusCheckbox = new CheckBox() { Width = 20, Height = 14, Margin = Padding.Empty };
 
-            //labelWSPPlusFluff.Text = "WSP+:";
-            //wspPlusCheckbox.Margin = Padding.Empty;
+                this.Controls.Add(labelWSPPlusFluff);
+                this.Controls.Add(wspPlusCheckbox);
+            }
+
         }
     }
 
@@ -687,3 +720,4 @@ namespace Gidrolock_Modbus_Scanner
         }
     }
 }
+#endregion

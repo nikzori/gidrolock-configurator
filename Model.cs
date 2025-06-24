@@ -25,8 +25,9 @@ namespace Gidrolock_Modbus_Scanner
         public bool hasScenarioSensor;
         public Entry sensorAlarm;
 
+        public List<Entry> wspPlusMode; // Premium Plus only for now
         public List<Entry> wiredLineBreak;
-         
+        
         public Entry radioStatus;
     }
 
