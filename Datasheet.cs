@@ -210,34 +210,36 @@ namespace Gidrolock_Modbus_Scanner
                         }
                     }
 
-                    if (device.wspPlusMode != null || device.wspPlusMode.Count > 0)
-                    {
-                        for(int i = 0; i < device.wspPlusMode.Count; i++)
+                    if (device.wspPlusMode != null)
+                        if (device.wspPlusMode.Count > 0)
                         {
-                            res = PollEntry(device.wspPlusMode[i]);
-                            if (res)
+                            for(int i = 0; i < device.wspPlusMode.Count; i++)
                             {
-                                bool value = latestMessage.Data[0] > 0x00 ? true : false;
-                                WiredSensor snsr = sensorPanel.Controls[i] as WiredSensor;
-                                snsr.Invoke(new MethodInvoker(delegate { snsr.wspPlusCheckbox.Checked = value; }));
+                                res = PollEntry(device.wspPlusMode[i]);
+                                if (res)
+                                {
+                                    bool value = latestMessage.Data[0] > 0x00 ? true : false;
+                                    WiredSensor snsr = sensorPanel.Controls[i] as WiredSensor;
+                                    snsr.Invoke(new MethodInvoker(delegate { snsr.wspPlusCheckbox.Checked = value; }));
+                                }
                             }
                         }
-                    }
 
-                    if (device.wiredLineBreak != null || device.wiredLineBreak.Count > 0)
-                    {
-                        for (int i = 0; i < device.wiredLineBreak.Count; i++)
+                    if (device.wiredLineBreak != null)
+                        if(device.wiredLineBreak.Count > 0)
                         {
-                            res = PollEntry(device.wiredLineBreak[i]);
-                            if (res)
+                            for (int i = 0; i < device.wiredLineBreak.Count; i++)
                             {
-                                bool value = latestMessage.Data[0] > 0x00 ? true : false;
-                                WiredSensor snsr = sensorPanel.Controls[i] as WiredSensor;
-                                snsr.Invoke(new MethodInvoker(delegate { snsr.labelBreak.Text = value ? "Обрыв!" : "ОК"; }));
+                                res = PollEntry(device.wiredLineBreak[i]);
+                                if (res)
+                                {
+                                    bool value = latestMessage.Data[0] > 0x00 ? true : false;
+                                    WiredSensor snsr = sensorPanel.Controls[i] as WiredSensor;
+                                    snsr.Invoke(new MethodInvoker(delegate { snsr.labelBreak.Text = value ? "Обрыв!" : "ОК"; }));
 
+                                }
                             }
                         }
-                    }
 
                     res = PollEntry(device.sensorAlarm);
                     if (res)
@@ -657,14 +659,15 @@ namespace Gidrolock_Modbus_Scanner
 
             labelBreakFluff.Text = "Обрыв:";
             labelBreak.Text = "неизвестно";
-            if (device.wspPlusMode != null || device.wspPlusMode.Count > 0)
-            {
-                labelWSPPlusFluff = new Label() { Width = 45, Height = 24, Text = "WSP+:" };
-                wspPlusCheckbox = new CheckBox() { Width = 20, Height = 14, Margin = Padding.Empty };
+            if (device.wspPlusMode != null)
+                if (device.wspPlusMode.Count > 0)
+                {
+                    labelWSPPlusFluff = new Label() { Width = 45, Height = 24, Text = "WSP+:" };
+                    wspPlusCheckbox = new CheckBox() { Width = 20, Height = 14, Margin = Padding.Empty };
 
-                this.Controls.Add(labelWSPPlusFluff);
-                this.Controls.Add(wspPlusCheckbox);
-            }
+                    this.Controls.Add(labelWSPPlusFluff);
+                    this.Controls.Add(wspPlusCheckbox);
+                }
 
         }
     }
